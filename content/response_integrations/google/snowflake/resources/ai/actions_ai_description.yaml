@@ -1,69 +1,31 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Execute Custom Query:
   ai_description: >-
     ### General Description
 
-    Executes a custom SQL query in Snowflake to retrieve data for investigations.
-    This action supports asynchronous execution, meaning it submits the query and
-    then polls for results, making it suitable for long-running queries. The results
-    are returned as a JSON object and displayed in a data table within the SOAR platform.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Query | String | Yes | The SQL query to execute. Note: A LIMIT clause is appended
-    automatically based on the 'Max Results To Return' parameter. |
-
-    | Database | String | Yes | The Snowflake database to run the query against. |
-
-    | Schema | String | No | The specific schema within the database. |
-
-    | Max Results To Return | Integer | No | The maximum number of rows to fetch (Default:
-    50). |
-
-
-    ### Additional Notes
-
-    - The action is asynchronous and may require adjusting the script timeout in the
-    IDE for very large queries.
-
-    - The 'Max Results To Return' parameter must be a positive number.
+    Executes a custom query in Snowflake and retrieves the results.
 
 
     ### Flow Description
 
-    1. **Authentication**: Generates a JWT token using the provided private key for
-    Snowflake Key Pair authentication.
+    1. Initializes the Snowflake manager with the provided credentials.
 
-    2. **Query Submission**: Submits the SQL query to the Snowflake REST API. The
-    action automatically appends a `LIMIT` clause to the query.
+    2. Submits the custom query to the specified Snowflake database and schema via
+    the Snowflake API.
 
-    3. **Asynchronous Handling**: If the query is not finished immediately, the action
-    enters an 'In Progress' state, storing the `query_id` to check status in subsequent
-    runs.
+    3. Checks the execution status of the query asynchronously.
 
-    4. **Data Retrieval**: Once the query completes, the action fetches the result
-    set.
+    4. Once completed, retrieves the query results and attaches them to the action's
+    output as a JSON object and a CSV data table.
 
-    5. **Output**: The retrieved data is processed into a JSON result and a CSV-formatted
-    data table named 'Results'.
+
+    ### Additional Notes
+
+    This action runs asynchronously. The query should not contain the LIMIT keyword,
+    as it is added automatically based on the 'Max Results To Return' parameter. Only
+    single quotes are supported in the query.
+  ai_short_description: >-
+    Executes a custom query in Snowflake and returns the results as a JSON object
+    and a data table.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -74,10 +36,47 @@ Execute Custom Query:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: true
+    reasoning: >-
+      The action makes API requests to Snowflake to submit a query and fetch the results.
+      It fetches data but does not mutate external data, nor does it update internal
+      entities, create insights, or modify alert data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -91,74 +90,82 @@ Execute Custom Query:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or filter any entities. It executes a standalone
+      query against Snowflake based on the provided parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action executes a custom query in Snowflake to retrieve data, which aligns
+      with the 'Search Events' category as it returns a collection of historical logs
+      or telemetry data matching specific search parameters.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: true
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| Query | String | Yes | Specify the query that needs to\
+    \ be executed in Snowflake. Note: query shouldn't contain LIMIT keyword, because\
+    \ it\u2019s added automatically. Only single quotes are supported in the query.\
+    \ |\n| Database | String | Yes | Specify the name of the database in which you\
+    \ want to execute the query. |\n| Schema | String | No | Specify the name of the\
+    \ schema in which you want to execute the query. |\n| Max Results To Return |\
+    \ Integer | No | Specify how many results to return for the query. Default: 50.\
+    \ |"
 Execute Simple Query:
   ai_description: >-
-    Executes a SQL SELECT query against a Snowflake database to retrieve specific
-    records based on user-defined parameters. This action is designed for flexible
-    data retrieval, allowing users to specify the database, table, schema, and filtering
-    criteria. It operates asynchronously, submitting the query and then polling for
-    results.
+    ### General Description
 
-
-    ### Parameters Description
-
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Database | String | Yes | The name of the Snowflake database to query. |
-
-    | Table | String | Yes | The name of the table within the database to query. |
-
-    | Schema | String | No | The specific schema to use for the query. |
-
-    | Where Filter | String | No | SQL WHERE clause logic (e.g., `status = 'ACTIVE'`).
-    Do not include the 'WHERE' keyword. |
-
-    | Fields To Return | String | No | Comma-separated list of columns to return.
-    Defaults to `*` (all fields). |
-
-    | Sort Field | String | No | The column name to use for sorting results. |
-
-    | Sort Order | String | No | The direction of sorting: `ASC` (default) or `DESC`.
-    |
-
-    | Max Results To Return | Integer | No | The maximum number of rows to retrieve.
-    Defaults to 50. |
-
-
-    ### Additional Notes
-
-
-    - This action runs asynchronously. If the query takes time, the action will enter
-    an 'In Progress' state and poll for completion in subsequent cycles.
-
-    - The action results are provided as both a Data Table (for the Case Wall) and
-    a JSON object (for downstream logic).
+    Executes a simple SELECT query in Snowflake based on provided parameters such
+    as database, table, schema, and filters, and returns the results.
 
 
     ### Flow Description
 
+    1. Initializes the Snowflake manager with API credentials.
 
-    1. **Initialization**: The action initializes the Snowflake manager using the
-    integration's configuration (API Root, Account, Credentials).
+    2. Builds a SQL SELECT query string using the provided parameters (Fields To Return,
+    Table, Where Filter, Sort Field, Sort Order).
 
-    2. **Query Construction**: It builds a SQL SELECT statement by combining the `Fields
-    To Return`, `Table`, `Where Filter`, `Sort Field`, and `Sort Order` parameters.
+    3. Submits the query asynchronously to Snowflake via a POST request to the `/api/v2/statements`
+    endpoint.
 
-    3. **Submission**: On the first run, it submits the query to the Snowflake SQL
-    API and receives a `statementHandle` (Query ID).
+    4. Polls the query status via a GET request to the `/api/v2/statements/{query_id}`
+    endpoint.
 
-    4. **Polling**: The action checks the status of the submitted query. If it is
-    still running, the action saves the Query ID and waits for the next execution
-    cycle.
+    5. Once completed, retrieves the results and attaches them to the action's output
+    as a JSON result and a data table.
 
-    5. **Data Retrieval**: Once the query is finished, the action fetches the result
-    set.
 
-    6. **Output**: The retrieved data is formatted into a CSV-style table and a JSON
-    array, which are then attached to the action's results in Google SecOps.
+    ### Additional Notes
+
+    The action runs asynchronously. Ensure the script timeout value in the IDE is
+    adjusted as needed.
+  ai_short_description: >-
+    Executes a simple SELECT query in Snowflake based on provided parameters and returns
+    the results.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -169,10 +176,47 @@ Execute Simple Query:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data by executing a SELECT query in Snowflake and retrieving
+      the results. It does not mutate external data, internal data, update entities,
+      create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -186,59 +230,83 @@ Execute Simple Query:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not use or process any entities. It operates purely on the provided
+      action parameters to execute a query in Snowflake.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action executes a query in Snowflake, which is typically used to search
+      for historical logs, telemetry data, or other records matching specific parameters.
+      Therefore, it matches the 'Search Events' category.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: true
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| Database | String | Yes | Specify the name of the database\
+    \ in which you want to execute the query. |\n| Table | String | Yes | Specify\
+    \ the name of the table in which you want to execute the query. |\n| Schema |\
+    \ String | No | Specify the name of the schema in which you want to execute the\
+    \ query. |\n| Where Filter | String | No | Specify the WHERE filter for the query\
+    \ that needs to be executed. Note: you don't need to limit and sort. Also, you\
+    \ don\u2019t need to provide WHERE string in the payload. Only single quotes are\
+    \ supported in the query. |\n| Fields To Return | String | No | Specify what fields\
+    \ to return. If nothing is provided action will return all fields. Wildcard character\
+    \ is supported. |\n| Sort Field | String | No | Specify what parameter should\
+    \ be used for sorting. |\n| Sort Order | Dropdown | No | Specify the order of\
+    \ sorting. |\n| Max Results To Return | String | No | Specify how many results\
+    \ to return. Default: 50. |"
 Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic utility used to verify the connectivity between
-    Google SecOps and a Snowflake instance. It ensures that the integration configuration
-    parameters, such as the API Root, Account, Username, and Private Key, are correctly
-    set and that the network path to the Snowflake SQL API is functional.
-
-
-    ### Parameters Description
-
-    There are no action-specific parameters for this action. It relies on the following
-    integration configuration parameters:
-
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **API Root** | String | Yes | The base URL for the Snowflake API. |
-
-    | **Account** | String | Yes | The Snowflake account identifier. |
-
-    | **Username** | String | Yes | The username used for authentication. |
-
-    | **Private Key** | String | Yes | The base64-encoded private key used for JWT
-    authentication. |
-
-    | **Verify SSL** | Boolean | Yes | Whether to verify the SSL certificate of the
-    Snowflake server. |
+    Tests connectivity to the Snowflake instance using the provided integration configuration
+    parameters.
 
 
     ### Flow Description
 
-    1. **Initialization**: Extracts the integration configuration parameters from
-    the Marketplace settings.
+    1. Extracts integration configuration parameters (API Root, Account, Username,
+    Private Key, Verify SSL).
 
-    2. **Authentication**: Decodes the provided private key and generates a JSON Web
-    Token (JWT) for secure authentication with the Snowflake SQL API.
+    2. Initializes the Snowflake manager with the extracted parameters.
 
-    3. **Connectivity Check**: Executes a synchronous POST request to the Snowflake
-    API endpoint with a lightweight metadata query (`SHOW TABLES LIMIT 1`).
+    3. Makes an API call (POST to `/api/v2/statements?async=false`) executing a simple
+    query (`SHOW TABLES LIMIT 1`) to verify connectivity.
 
-    4. **Validation**: Evaluates the HTTP response. If the request is successful,
-    it confirms connectivity; otherwise, it captures and reports the specific error
-    encountered.
+    4. Returns a success or failure message based on the API response.
 
 
     ### Additional Notes
 
-    This action does not process any entities, modify any data in Snowflake, or create
-    any internal records in Google SecOps. It is strictly for configuration validation.
+    This action is typically used to verify that the integration is configured correctly
+    and can successfully authenticate and communicate with the Snowflake API.
+  ai_short_description: >-
+    Tests connectivity to the Snowflake instance using the provided integration configuration
+    parameters.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -249,10 +317,48 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to Snowflake to execute a 'SHOW TABLES' query,
+      which is a read-only operation used to verify connectivity. It does not fetch
+      contextual data for alerts, mutate external data, mutate internal data, update
+      entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -266,3 +372,39 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It solely relies
+      on integration configuration parameters to test connectivity.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enriching IOCs, updating alerts, or mutating
+      external systems.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

@@ -2,31 +2,25 @@ Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic utility used to verify the connectivity and
-    functional status of the **Spell Checker** integration within Google SecOps. Its
-    primary purpose is to ensure that the integration environment is correctly set
-    up and that the action execution engine can successfully initialize the integration's
-    components.
-
-
-    ### Parameters
-
-    There are no parameters required for this action.
-
-
-    ### Additional Notes
-
-    This action does not interact with any external APIs or perform any spell-checking
-    logic. It is strictly used for health checks.
+    Checks connectivity to the Spell Checker integration.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action initializes the Siemplify API context.
+    1. Initializes the Siemplify action.
 
-    2. **Connectivity Confirmation**: The action immediately concludes, returning
-    a success message ('Spell Checker is connected') to indicate that the integration
-    is reachable and active.
+    2. Immediately completes the action and returns a static success message indicating
+    that the Spell Checker is connected.
+
+
+    ### Additional Notes
+
+    This action does not perform any external API calls, process any entities, or
+    require any parameters. It serves purely as a basic health or connectivity check
+    for the integration.
+  ai_short_description: >-
+    Checks connectivity to the Spell Checker integration by returning a static success
+    message.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -37,10 +31,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action simply initializes the SiemplifyAction object and immediately ends
+      with a static success message. It does not interact with external APIs, internal
+      data, entities, insights, alerts, or case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -54,55 +85,79 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not access `siemplify.target_entities` or perform any entity-specific
+      operations. It simply returns a static string.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity check (Ping) that returns a static success
+      message. It does not enrich IOCs/assets, update alerts, manage tickets, modify
+      blocklists/allowlists, manage identities, contain hosts, search/execute on hosts,
+      or interact with emails/files. Thus, it does not match any of the predefined
+      outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Spelling Check:
   ai_description: >-
     ### General Description
 
-    This action identifies misspelled words within a provided text string and suggests
-    potential corrections based on word frequency. It is designed to help analysts
-    clean up notes, communications, or extracted data within the SOAR platform by
-    highlighting typographical errors.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Input | String | No | The raw text that will be analyzed for spelling errors.
-    If left empty, the action will process an empty string. |
+    Analyzes a provided text string to identify misspelled words and suggests likely
+    correct spellings based on word frequency. It utilizes a local spell-checking
+    library configured with a custom allowlist of common technology and cybersecurity
+    terms.
 
 
     ### Flow Description
 
-    1. **Text Retrieval**: The action retrieves the string provided in the `Input`
-    parameter.
+    1. Retrieves the input text from the action parameters.
 
-    2. **Sanitization**: It cleans the input text using regular expressions to remove
-    special characters while preserving letters, spaces, and specific symbols like
-    '@' (to identify emails).
+    2. Cleans the text by removing special characters, URLs, and email addresses using
+    regular expressions.
 
-    3. **Filtering**: The logic splits the text into individual words and filters
-    out potential false positives such as email addresses and URLs (containing 'http').
+    3. Processes the cleaned text to identify unknown or misspelled words using the
+    local `SpellChecker` library.
 
-    4. **Misspelling Identification**: It utilizes a spell-checking manager (augmented
-    with a custom allowlist of technical terms like 'siemplify' and 'playbook') to
-    identify words not found in its dictionary.
+    4. Generates a list of suggested candidate corrections for each identified misspelled
+    word.
 
-    5. **Suggestion Generation**: For every misspelled word found, the action generates
-    a list of candidate corrections.
-
-    6. **Output Generation**: The results are formatted into a JSON object and a data
-    table titled 'Found spelling mistakes' which is attached to the action output
-    in the SOAR case.
+    5. Outputs the findings as a JSON result and a formatted data table within the
+    SecOps platform.
 
 
     ### Additional Notes
 
-    This action performs local text processing and does not require connectivity to
-    external web services or APIs. It does not interact with or filter entities within
-    the case scope.
+    This action operates locally using a Python library and does not make external
+    API calls. It processes raw text input and does not operate on or modify SecOps
+    entities.
+  ai_short_description: >-
+    Analyzes a provided text string to identify misspelled words and suggests likely
+    correct spellings based on word frequency.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -113,10 +168,48 @@ Spelling Check:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action processes a text string using a local Python library (`spellchecker`)
+      to find spelling mistakes. It does not make external API calls to fetch data,
+      mutate external systems, or modify internal SecOps data such as entities, alerts,
+      or case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -130,3 +223,47 @@ Spelling Check:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It solely processes the text provided in the `Input` parameter.
+      Therefore, all entity type and filter flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action performs a utility function (spell checking text) using a local library.
+      It does not enrich IOCs or assets, update alerts, interact with tickets, modify
+      blocklists/allowlists, manage identities, contain hosts, search/execute on endpoints,
+      or manage emails. Therefore, it does not match any of the predefined outcome
+      categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Input | String | No | The text that will be checked by the Spell Checker |

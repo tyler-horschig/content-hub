@@ -1,81 +1,88 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Enrich Endpoint:
   ai_description: >-
     ### General Description
 
-    Enriches Hostname and IP Address entities by retrieving detailed system information
-    from SolarWinds Orion. This action queries the SolarWinds Information Service
-    (SWIS) to gather data such as OS version, system uptime, description, and network
-    details, providing security analysts with better context for investigated endpoints.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | IP Address | String | Yes | The IP address or hostname of the SolarWinds Orion
-    instance. |
-
-    | Username | String | Yes | The username for the SolarWinds Orion account. |
-
-    | Password | String | Yes | The password for the SolarWinds Orion account. |
-
-    | Verify SSL | Boolean | Yes | If enabled, verifies the SSL certificate for the
-    connection. |
+    Enriches Hostname and IP Address entities by fetching system information from
+    SolarWinds Orion.
 
 
     ### Flow Description
 
-    1. **Initialization**: Connects to the SolarWinds Orion API using the provided
-    credentials and configuration.
+    1. Filters target entities to include only Hostname and IP Address types.
 
-    2. **Entity Filtering**: Identifies all Hostname and IP Address entities within
-    the current context.
+    2. Constructs a query to fetch system information (e.g., OS version, CPU load,
+    memory usage) for the targeted entities from SolarWinds Orion.
 
-    3. **Query Construction**: Dynamically builds a SWQL (SolarWinds Query Language)
-    query to fetch node information for all identified entities in a single request.
+    3. Executes the query against the SolarWinds Orion API via an HTTP POST request.
 
-    4. **Data Retrieval**: Executes the query against the SolarWinds Information Service.
+    4. Matches the retrieved data with the corresponding entities based on their IP
+    address or hostname.
 
-    5. **Enrichment**: Maps the returned data back to the corresponding entities,
-    updating their additional properties with the retrieved system details and marking
-    them as enriched.
+    5. Enriches the matched entities' additional properties with the retrieved system
+    information and marks them as enriched.
 
-    6. **Reporting**: Outputs a summary of successfully enriched entities and provides
-    the raw data in JSON format.
+    6. Updates the entities in the Google SecOps platform and attaches the raw JSON
+    results to the action.
+
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Enriches Hostname and IP Address entities by fetching detailed system information
+    from SolarWinds Orion.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: true
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Updates entity additional properties with system information from SolarWinds
-      Orion and sets the 'is_enriched' flag to true.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from SolarWinds Orion via a POST request containing
+      a SELECT query. It does not mutate external data. It updates the entities in
+      Google SecOps with the retrieved data using `siemplify.update_entities`. It
+      does not create insights, modify alert data, or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -89,218 +96,74 @@ Enrich Endpoint:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and filters them using
+      `entity.entity_type in [EntityTypes.HOSTNAME, EntityTypes.ADDRESS]`. Therefore,
+      it targets Hostname and Address entities and filters by entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves system information such as CPU load, memory usage, and
+      OS details for IP addresses and hostnames from SolarWinds Orion. This aligns
+      with the 'Enrich Asset' category, which returns contextual metadata for a resource.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action.
 Execute Entity Query:
   ai_description: >-
     ### General Description
 
-    Executes a custom SolarWinds Query Language (SWQL) query against a SolarWinds
-    Orion instance, specifically filtered by the IP and Hostname entities present
-    in the current Google SecOps context. This action allows for flexible data retrieval
-    from the Orion Information Service (SWIS) to provide context-specific information
-    about network nodes.
+    Executes a custom query in SolarWinds Orion based on the provided IP Address and
+    Hostname entities.
 
 
-    ### Parameters Description
+    ### Flow Description
 
-    | Parameter | Description | Type | Mandatory |
+    1. Extracts the provided query and entity keys from the action parameters.
 
-    | :--- | :--- | :--- | :--- |
+    2. Filters the target entities to include only IP Address and Hostname types.
 
-    | Query | The base SWQL query to execute. Note: Do not include a `WHERE` clause
-    or `*` notation as the action handles these automatically. | String | Yes |
+    3. Constructs a final query by appending a `WHERE` clause that matches the entity
+    identifiers against the specified entity keys.
 
-    | IP Entity Key | The field name in SolarWinds used to match IP Address entities
-    (default: `IpAddress`). | String | No |
+    4. Executes the constructed query against the SolarWinds Orion API.
 
-    | Hostname Entity Key | The field name in SolarWinds used to match Hostname entities
-    (default: `Hostname`). | String | No |
-
-    | Max Results To Return | The maximum number of query results to return and display
-    (default: 100). | Integer | No |
+    5. Retrieves the query results, limits them to the specified maximum, and attaches
+    them to the action's JSON result and a data table.
 
 
     ### Additional Notes
 
-    - The action automatically appends a `WHERE` clause to the provided query string
-    using an `OR` logic for all identified entities.
-
-    - Users should ensure the base query is compatible with SWIS syntax and does not
-    contain a `WHERE` clause.
-
-
-    ### Flow Description
-
-    1. **Entity Filtering:** Identifies all `ADDRESS` and `HOSTNAME` entities in the
-    current scope.
-
-    2. **Query Construction:** Dynamically builds a `WHERE` clause using the provided
-    `IP Entity Key` and `Hostname Entity Key` mapped to the entity identifiers.
-
-    3. **API Interaction:** Executes the constructed query via a POST request to the
-    SolarWinds Orion query endpoint.
-
-    4. **Data Processing:** Limits the result set based on the `Max Results To Return`
-    parameter.
-
-    5. **Output Generation:** Returns the raw results as JSON and creates a formatted
-    data table on the case wall for visibility.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action adds a data table to the case wall containing the results of the
-      executed query.
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types:
-    - ADDRESS
-    - HOSTNAME
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: true
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Execute Query:
-  ai_description: >-
-    ### General Description
-
-    The **Execute Query** action allows users to run custom SolarWinds Information
-    Service (SWIS) queries against a SolarWinds Orion instance. This is a powerful
-    utility for retrieving specific monitoring data, node information, or system metrics
-    that are not covered by standard enrichment actions. The results are returned
-    as a JSON object and visualized as a data table within the Google SecOps case.
-
-
-    ### Parameters Description
-
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Query** | String | Yes | The SWIS query to be executed. Note that SolarWinds
-    queries typically do not support the asterisk (*) notation for selecting all fields;
-    specific fields must be named. |
-
-    | **Max Results To Return** | Integer | No | Defines the maximum number of rows
-    to retrieve from the query results. Defaults to 100 if not specified. |
-
-
-    ### Additional Notes
-
-    - This action does not run on specific entities; it executes a global query based
-    on the provided string.
-
-    - Ensure the SWIS query syntax is correct according to SolarWinds Orion documentation,
-    as the action will fail if the query is malformed.
-
-
-    ### Flow Description
-
-    1. **Initialization**: The action initializes the SolarWinds Orion manager using
-    the provided integration credentials (IP, Username, Password).
-
-    2. **Parameter Extraction**: It retrieves the user-defined SWIS query and the
-    result limit.
-
-    3. **Execution**: The action sends a POST request to the SolarWinds Information
-    Service API endpoint with the query payload.
-
-    4. **Processing**: The response is parsed into a list of query result objects.
-    The list is then truncated based on the 'Max Results To Return' parameter.
-
-    5. **Output**: If results are found, they are added to the action's JSON output
-    and formatted into a data table named 'Results' for display on the case wall.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action creates a data table on the case wall to display the results of the
-      executed query.
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Ping:
-  ai_description: >-
-    ### General Description
-
-    The **Ping** action is a diagnostic tool designed to verify the connectivity between
-    Google SecOps and a SolarWinds Orion instance. It ensures that the provided credentials
-    (Username/Password) and the network path (IP Address) are valid and that the SolarWinds
-    Information Service (SWIS) API is responsive.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **IP Address** | String | Yes | The IP address or hostname of the SolarWinds
-    Orion server. |
-
-    | **Username** | String | Yes | The username used to authenticate with the SolarWinds
-    Orion instance. |
-
-    | **Password** | String | Yes | The password used to authenticate with the SolarWinds
-    Orion instance. |
-
-    | **Verify SSL** | Boolean | Yes | If enabled, the action will verify the SSL
-    certificate of the SolarWinds Orion server. |
-
-
-    ### Flow Description
-
-    1. **Parameter Extraction:** The action retrieves the connection details (IP,
-    Username, Password, and SSL settings) from the integration configuration.
-
-    2. **Manager Initialization:** It initializes the `SolarWindsOrionManager` with
-    the provided credentials.
-
-    3. **Connectivity Test:** The action executes a lightweight SQL query (`SELECT
-    DisplayName FROM Orion.Nodes ORDER BY DisplayName WITH ROWS 1 TO 1`) against the
-    SolarWinds Information Service API.
-
-    4. **Validation:** It validates the HTTP response. If the query returns a successful
-    status code, the connection is confirmed.
-
-    5. **Result Reporting:** The action returns a success message if the connection
-    is established, or an error message detailing the failure if the request fails.
+    SolarWinds queries do not support the `*` notation. The provided query should
+    not contain a `WHERE` clause, as the action automatically appends it based on
+    the target entities.
+  ai_short_description: >-
+    Executes a custom query in SolarWinds Orion based on IP Address and Hostname entities,
+    returning the results as JSON and a data table.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -311,10 +174,188 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data by executing a query against the SolarWinds Orion API.
+      It does not mutate external data (the API endpoint is for querying), nor does
+      it mutate internal data, update entities, create insights, or add case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: true
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and filters them using
+      `entity.entity_type in SUPPORTED_ENTITY_TYPES`, where supported types are HOSTNAME
+      and ADDRESS. It does not filter by other properties.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action executes a generic query in SolarWinds Orion based on entity identifiers.
+      It does not specifically enrich IOCs or assets, update alerts, or perform any
+      containment or blocklist operations. Therefore, it does not match any of the
+      specific expected outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| Query | String | Yes | Specify the query that needs to\
+    \ be executed. Note: SolarWind queries don\u2019t support \u201C*\u201D notation\
+    \ and you shouldn\u2019t have a WHERE clause in the query, because it is added\
+    \ by the action. Please refer to the action documentation for details. |\n| IP\
+    \ Entity Key | String | No | Specify what key should be used with IP entities\
+    \ in the WHERE clause of the query. Please refer to the action documentation for\
+    \ details. Default: IpAddress. |\n| Hostname Entity Key | String | No | Specify\
+    \ what key should be used with Hostname entities in the WHERE clause of the query.\
+    \ Please refer to the action documentation for details. Default: Hostname |\n\
+    | Max Results To Return | String | No | Specify how many results should be returned.\
+    \ |"
+Execute Query:
+  ai_description: >-
+    ### General Description
+
+    Executes a custom SolarWinds Query Language (SWQL) query in SolarWinds Orion and
+    retrieves the results.
+
+
+    ### Flow Description
+
+    1. Initializes the connection to the SolarWinds Orion API.
+
+    2. Executes the provided SWQL query via a POST request to the `/SolarWinds/InformationService/v3/Json/Query`
+    endpoint.
+
+    3. Limits the number of returned results based on the `Max Results To Return`
+    parameter.
+
+    4. Formats the retrieved data and attaches it to the action's JSON result and
+    a case wall data table.
+
+
+    ### Additional Notes
+
+    SolarWinds queries do not support the "*" notation.
+  ai_short_description: >-
+    Executes a custom SWQL query in SolarWinds Orion and returns the results.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data by executing a query against the SolarWinds Orion API
+      (fetches_data=true). It does not perform state-changing operations on external
+      systems, nor does it mutate internal data, update entities, create insights,
+      modify alerts, or create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -328,3 +369,176 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It executes a standalone query provided via the action parameters,
+      so all entity type and filter flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action executes a generic SWQL query against SolarWinds Orion to retrieve
+      arbitrary data. It does not specifically enrich IOCs/assets, mutate alerts,
+      contain hosts, or perform any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| Query | String | Yes | Specify the query that needs to\
+    \ be executed. Note: SolarWind queries don\u2019t support \u201C*\u201D notation.\
+    \ |\n| Max Results To Return | String | No | Specify how many results should be\
+    \ returned. |"
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Tests connectivity to the SolarWinds Orion server using the integration configuration
+    parameters.
+
+
+    ### Flow Description
+
+    1. Extracts the integration configuration parameters (IP Address, Username, Password,
+    Verify SSL).
+
+    2. Initializes the SolarWinds Orion manager.
+
+    3. Sends a POST request to the SolarWinds Orion API (`/SolarWinds/InformationService/v3/Json/Query`)
+    to execute a simple SELECT query (`SELECT DisplayName FROM Orion.Nodes ORDER BY
+    DisplayName WITH ROWS 1 TO 1`).
+
+    4. Validates the response to confirm successful authentication and connectivity.
+
+    5. Returns a success or failure message based on the response.
+
+
+    ### Additional Notes
+
+    This action is primarily used to verify that the integration is configured correctly
+    and can communicate with the SolarWinds Orion server. It does not require any
+    action-specific parameters or entities to run.
+  ai_short_description: >-
+    Tests connectivity to the SolarWinds Orion server to verify integration configuration.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a POST request to execute a simple SELECT query to test connectivity.
+      It does not fetch contextual data for alerts/entities, mutate external data,
+      mutate internal data, update entities, create insights, modify alert data, or
+      create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It only tests connectivity to the external service.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (ping) to the SolarWinds Orion server.
+      It does not enrich entities, mutate external data, update alerts, or perform
+      any operations that match the defined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

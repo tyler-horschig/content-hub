@@ -1,77 +1,79 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Fetch System Information:
   ai_description: >-
     ### General Description
 
-    The **Fetch System Information** action retrieves detailed device metadata from
-    MobileIron for a given IP address. It is primarily used to gain visibility into
-    the state, ownership, and configuration of mobile devices or endpoints managed
-    by MobileIron.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Fields To Fetch | String | No | A comma-separated list of specific MobileIron
-    fields to retrieve (e.g., `ios.DeviceName,user.email_address`). If left empty,
-    the action fetches a comprehensive default set of fields including OS version,
-    battery level, and compliance status. |
+    Fetches system information for a device from MobileIron using its IP address.
+    This action retrieves contextual metadata about the device and attaches it as
+    an entity table to the action results.
 
 
     ### Flow Description
 
-    1. **Entity Filtering**: The action identifies all `ADDRESS` entities within the
-    current context.
+    1. Iterates over target entities of type ADDRESS.
 
-    2. **API Query**: For each IP address, it queries the MobileIron API (`/api/v2/devices`)
-    using a filter for the `common.ip_address` field.
+    2. Makes a GET request to the MobileIron API to fetch device information by the
+    IP address.
 
-    3. **Data Extraction**: It extracts the device information, applying the field
-    filters specified in the "Fields To Fetch" parameter.
-
-    4. **Enrichment**: The retrieved data is flattened and attached to the entity
-    as a data table for analyst review.
+    3. If successful, formats the retrieved system information and adds it as an entity
+    table to the action result.
 
 
     ### Additional Notes
 
-    - This action requires the MobileIron integration to be configured with valid
-    API credentials and Root URL.
-
-    - If multiple devices share the same IP, the action retrieves the first match.
+    None.
+  ai_short_description: >-
+    Fetches system information for a device from MobileIron using its IP address.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: true
+    can_mutate_internal_data: false
+    can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds a data table to the IP address entity containing system information retrieved
-      from MobileIron.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches device information from the MobileIron API (fetches_data=true).
+      It does not mutate external data, update entities, create insights, modify alert
+      data, or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -85,52 +87,79 @@ Fetch System Information:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and filters them using
+      `entity.entity_type == EntityTypes.ADDRESS`. Therefore, it targets ADDRESS entities
+      and filters by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches system information for a device based on its IP address,
+      which aligns with the 'Enrich Asset' category as it returns contextual metadata
+      for a resource.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Fields To Fetch | String | No | The values of the inserted fields will be fetched
+    for a device(Has to be comma separated string), ex: ios.DeviceName,user.display_name,user.email_address,user.user_id
+    |
 Fetch System Information By UUID:
   ai_description: >-
     ### General Description
 
-    The **Fetch System Information By UUID** action retrieves detailed system and
-    hardware information for a specific mobile device managed by MobileIron. It uses
-    the device's unique identifier (UUID) to query the MobileIron API and returns
-    a comprehensive set of data points, including battery levels, OS versions, compliance
-    status, and network identifiers.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Device UUID | String | Yes | The unique identifier (UUID) of the target mobile
-    device in the MobileIron system. |
-
-
-    ### Additional Notes
-
-    * This action does not automatically iterate over entities in the Google SecOps
-    case. It relies strictly on the provided `Device UUID` parameter.
-
-    * The action is useful for deep-dive investigations into a specific mobile asset
-    once its UUID has been identified by other discovery actions.
+    Retrieves detailed system information for a specific device from MobileIron using
+    its unique Device UUID. This action allows analysts to gather contextual metadata
+    about a managed device directly from the MobileIron platform.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action initializes the MobileIron manager using the
-    integration's configuration settings (API Root, credentials, and SSL preferences).
+    1. Retrieves the `Device UUID` parameter provided in the action configuration.
 
-    2. **Parameter Retrieval**: It extracts the `Device UUID` from the action input
-    parameters.
+    2. Makes an HTTP GET request to the MobileIron API (`api/v2/devices/{uuid}/details`)
+    to fetch the device's system information.
 
-    3. **Data Retrieval**: The action calls the MobileIron API's device details endpoint
-    specifically for the provided UUID.
+    3. Parses the returned data and formats it into a key-value dictionary.
 
-    4. **Data Processing**: If information is found, the manager reformats the raw
-    key-value pairs into a structured dictionary.
+    4. Attaches the retrieved system information as a table to the action's results
+    in Google SecOps.
 
-    5. **Output**: The processed system information is added to the action results
-    as a data table, and the action completes successfully.
+
+    ### Additional Notes
+
+    This action does not operate on SecOps entities directly; it relies solely on
+    the provided `Device UUID` parameter to fetch the relevant data.
+  ai_short_description: >-
+    Retrieves detailed system information for a specific device from MobileIron using
+    its unique Device UUID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -141,10 +170,49 @@ Fetch System Information By UUID:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes an HTTP GET request to the MobileIron API to fetch device details,
+      meaning it fetches data. It does not perform any state-changing operations (POST/PUT/DELETE)
+      on external systems, so it does not mutate external data. It also does not update
+      entities, create insights, modify alerts, or create case comments within Google
+      SecOps.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -158,142 +226,82 @@ Fetch System Information By UUID:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The script does not iterate over `siemplify.target_entities` or use any entity
+      identifiers. It strictly uses the `Device UUID` parameter provided by the user
+      or playbook. Therefore, it does not run on entities and all entity-related flags
+      are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches device details by a specific UUID parameter. It does not
+      enrich a SecOps entity directly (no entity insights or entity updates are created),
+      nor does it mutate external state, update alerts, or perform containment. Therefore,
+      it does not strictly match any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Device UUID | String | Yes | The UUID of the target device. |
 List Devices:
   ai_description: >-
     ### General Description
 
-    Retrieves a comprehensive list of all devices managed within the MobileIron system.
-    This action is primarily used for administrative overview and asset discovery,
-    allowing users to specify exactly which data points (fields) should be returned
-    for each device.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Fields To Fetch | String | No | A comma-separated string of specific device
-    fields to retrieve (e.g., `ios.DeviceName,user.display_name,user.email_address`).
-    If left empty, the integration uses a predefined set of default fields including
-    hardware identifiers, status, and user information. |
-
-
-    ### Additional Notes
-
-    - This action does not target specific entities in the case; it performs a global
-    fetch of devices from the MobileIron instance.
-
-    - The results are presented both as a formatted data table for human review and
-    as a raw JSON object for downstream automation.
+    Retrieves a list of all devices managed by the MobileIron system. This action
+    fetches device details based on specified fields and presents the results in a
+    data table.
 
 
     ### Flow Description
 
-    1. **Authentication**: Connects to the MobileIron API using the configured API
-    Root, Username, and Password.
+    1. Initializes the MobileIron manager using the integration configuration.
 
-    2. **Data Retrieval**: Executes a GET request to the `/api/v2/devices` endpoint,
-    passing the `Fields To Fetch` parameter to filter the returned attributes.
+    2. Retrieves the optional 'Fields To Fetch' parameter to determine which device
+    attributes to return.
 
-    3. **Data Processing**: Flattens the resulting JSON structures into a tabular
-    format.
+    3. Makes an API call (GET request) to the MobileIron endpoint to fetch the list
+    of devices.
 
-    4. **Output Generation**: Constructs a CSV-formatted data table named "Devices"
-    and attaches it to the action results in Google SecOps.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action adds a data table named 'Devices' to the action results, which is
-      stored within the Google SecOps case data.
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Ping:
-  ai_description: >-
-    ### General Description
+    4. If devices are found, flattens the JSON response, constructs a CSV, and attaches
+    it as a data table named "Devices".
 
-    The **Ping** action is a diagnostic tool used to verify the connectivity between
-    Google SecOps and a MobileIron instance. It ensures that the provided credentials
-    (Username and Password) and the API Root URL are correct and that the MobileIron
-    service is reachable over the network.
-
-
-    ### Parameters Description
-
-    This action does not have any input parameters. It relies entirely on the integration's
-    configuration settings:
-
-
-    | Parameter Name | Description | Type | Mandatory | Notes |
-
-    | :--- | :--- | :--- | :--- | :--- |
-
-    | API Root | The base URL of the MobileIron instance. | String | Yes | Used to
-    construct the API endpoint. |
-
-    | Username | The API username for authentication. | String | Yes | Used for Basic
-    Auth. |
-
-    | Password | The API password for authentication. | String | Yes | Used for Basic
-    Auth. |
-
-    | Admin Device ID | The device space ID of the administrator. | Integer | No |
-    Defaults to 1 if not provided. |
-
-    | Cloud Instance | Whether the instance is a cloud-based MobileIron instance.
-    | Boolean | No | If true, appends 'rest/' to the API root. |
-
-    | Verify SSL | Whether to verify the SSL certificate of the connection. | Boolean
-    | No | Defaults to false. |
+    5. Outputs a summary message indicating the number of devices found and attaches
+    the raw JSON response.
 
 
     ### Additional Notes
 
-    - This action is typically used during the initial setup of the integration or
-    for troubleshooting communication issues.
-
-    - It performs a simple GET request to the `api/V2/ping` endpoint.
-
-
-    ### Flow Description
-
-    1. **Configuration Retrieval:** The action fetches the integration configuration,
-    including the API Root, credentials, and connection settings.
-
-    2. **Manager Initialization:** It initializes the `MobileIronManager` with the
-    retrieved settings, handling URL formatting for cloud or on-premise instances.
-
-    3. **Connectivity Test:** The action calls the `ping()` method of the manager,
-    which sends a GET request to the MobileIron ping API.
-
-    4. **Response Validation:** The manager validates the HTTP response. If the status
-    code is successful, it returns `True`.
-
-    5. **Final Result:** The action ends by providing a success message ("Connection
-    Established.") or a failure message based on the API response.
+    This action does not require any entities to run and operates globally on the
+    MobileIron instance.
+  ai_short_description: >-
+    Retrieves a list of all devices managed by MobileIron and returns their details.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -304,10 +312,48 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to the MobileIron API to fetch a list of devices,
+      so it fetches data. It does not perform any POST/PUT/DELETE requests to mutate
+      external data. It also does not call any SDK methods to update entities, create
+      insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -321,42 +367,212 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
-Unlock Device:
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It fetches a global list of devices from the MobileIron system.
+      Therefore, it does not run on entities, and all entity type flags and filter
+      flags are set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a general list of all devices from MobileIron. It does
+      not enrich specific IOCs or assets, nor does it perform any containment, ticketing,
+      or alert modification tasks. Therefore, it does not match any of the predefined
+      outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Fields To Fetch | String | No | The values of the inserted fields will be fetched
+    for a device(Has to be comma separated string), ex: ios.DeviceName,user.display_name,user.email_address,user.user_id
+    |
+Ping:
   ai_description: >-
     ### General Description
 
-    Unlocks a mobile device managed by MobileIron using its IP address. This action
-    is primarily used to restore user access to a device after a security lock has
-    been applied or as part of a remediation workflow.
-
-
-    ### Parameters
-
-    There are no specific action parameters required for this action. It relies on
-    the global integration configuration (API Root, Username, Password, etc.) and
-    the IP address entities provided in the context.
+    Tests the connectivity to the MobileIron instance. This action is used to verify
+    that the integration is configured correctly and can successfully communicate
+    with the MobileIron API.
 
 
     ### Flow Description
 
-    1. **Entity Filtering**: The action identifies all IP Address (ADDRESS) entities
-    within the current alert or case context.
+    1. Retrieves the integration configuration parameters (API Root, Username, Password,
+    etc.).
 
-    2. **Device Resolution**: For each identified IP address, the action queries the
-    MobileIron API to find a matching device and retrieve its unique identifier (UUID).
+    2. Initializes the MobileIron API client.
 
-    3. **Unlock Command**: Once the UUID is obtained, the action sends a POST request
-    to the MobileIron 'action' endpoint with the `UNLOCK_DEVICE_ONLY` command type.
+    3. Makes a GET request to the `/api/V2/ping` endpoint to verify API validity.
 
-    4. **Execution Reporting**: The action logs the outcome of the unlock attempt
-    for each entity and provides a summary message to the user.
+    4. Returns a success message if the connection is established, or a failure message
+    otherwise.
 
 
     ### Additional Notes
 
-    This action requires the MobileIron 'Cloud Instance' and 'Admin Device ID' settings
-    to be correctly configured in the integration parameters to resolve device information
-    accurately.
+    This action does not require any entities or action-specific parameters to run.
+  ai_short_description: >-
+    Tests the connectivity to the MobileIron instance by pinging the API.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a GET request to a ping endpoint to test connectivity, but
+      it does not fetch additional contextual data on alerts/entities. It does not
+      mutate external data, internal data, update entities, create insights, modify
+      alert data, or create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It only tests connectivity
+      to the external system using integration configuration. Therefore, all entity
+      types and filters are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple ping to test connectivity. It does not enrich IOCs/assets,
+      update alerts, create tickets, block/allow IOCs, manage identities, contain
+      hosts, search events, or perform any other specific outcome category. Therefore,
+      all outcome categories are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+Unlock Device:
+  ai_description: >-
+    ### General Description
+
+    Unlocks a mobile device managed by MobileIron using its associated IP address.
+    This action initiates a state change on the external Mobile Device Management
+    (MDM) platform to remove the lock screen or passcode restriction from the target
+    device.
+
+
+    ### Flow Description
+
+    1. Iterates through target entities, filtering specifically for IP Address entities.
+
+    2. Queries the MobileIron API (GET request) to fetch the device UUID associated
+    with the given IP address.
+
+    3. Sends an action command to the MobileIron API (POST request) to unlock the
+    device using the retrieved UUID.
+
+    4. Returns a success or failure message based on the API response.
+
+
+    ### Additional Notes
+
+    This action requires the device to be currently managed and reachable by the MobileIron
+    instance. If multiple devices share the same IP address, the action will target
+    the first device returned by the MobileIron API.
+  ai_short_description: >-
+    Unlocks a mobile device in MobileIron based on its associated IP address.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -365,15 +581,51 @@ Unlock Device:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Sends a POST request to the MobileIron API to trigger a remote 'Unlock' command
-      on the physical mobile device associated with the target IP address.
+      Sends a command to MobileIron to unlock the target mobile device.
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches device information (UUID) from MobileIron using a GET request
+      (fetches_data=true). It then mutates external data by sending a POST request
+      to unlock the device (can_mutate_external_data=true). It does not mutate internal
+      SecOps data, update entities, or create insights.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -387,44 +639,72 @@ Unlock Device:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `entity.entity_type
+      == EntityTypes.ADDRESS`. Therefore, it targets ADDRESS entities and filters
+      strictly by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action unlocks a mobile device via an MDM platform. This does not match
+      'Uncontain Host' (which refers to network isolation via EDR), nor does it match
+      identity enablement or password resets. It does not fit into any of the predefined
+      outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Unlock Device by UUID:
   ai_description: >-
     ### General Description
 
-    Unlocks a mobile device managed by MobileIron using its unique Universal Unique
-    Identifier (UUID). This action is designed to remotely trigger an unlock command
-    on a specific device, facilitating administrative access or troubleshooting for
-    managed mobile assets.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Device UUID | String | Yes | The unique identifier (UUID) of the target device
-    to be unlocked. This value is used to target the specific device in the MobileIron
-    inventory. |
+    Unlocks a specific mobile device managed by MobileIron using its unique UUID.
+    This action initiates a state change on the MobileIron platform to remove the
+    device lock, restoring user access to the endpoint.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action initializes the MobileIron manager using the
-    integration's configuration settings (API Root, Credentials, etc.).
+    1. Retrieves the `Device UUID` parameter provided in the action configuration.
 
-    2. **Parameter Extraction**: The action retrieves the mandatory `Device UUID`
-    from the input parameters.
+    2. Validates that the UUID is not empty.
 
-    3. **Validation**: It checks if the `Device UUID` is provided; if not, it raises
-    an exception.
+    3. Makes a POST request to the MobileIron API (`api/v2/devices/action`) with the
+    action type set to `UNLOCK_DEVICE_ONLY` for the specified UUID.
 
-    4. **API Interaction**: The action calls the `unlock_device_by_uuid` method in
-    the manager, which sends a POST request to the MobileIron API (`api/v2/devices/action`)
-    with the `actionType` set to `UNLOCK_DEVICE_ONLY`.
+    4. Returns a success message to the SecOps platform upon successful execution.
 
-    5. **Completion**: Upon a successful API response, the action concludes with a
-    success message indicating the unlock command was sent for the specified UUID.
+
+    ### Additional Notes
+
+    This action does not operate on Google SecOps entities (like IP addresses or hostnames).
+    It relies entirely on the explicitly provided `Device UUID` parameter to target
+    the correct device in MobileIron.
+  ai_short_description: >-
+    Unlocks a specific mobile device in MobileIron using its UUID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -433,14 +713,52 @@ Unlock Device by UUID:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Triggers a remote 'UNLOCK_DEVICE_ONLY' command on the target mobile device via
-      the MobileIron platform, changing the device's lock state.
+      Sends a POST request to the MobileIron API to unlock a specific device by its
+      UUID.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action executes a POST request to the MobileIron API to unlock a device,
+      which mutates external data. It does not fetch contextual data, mutate internal
+      SecOps data, update entities, create insights, modify alerts, or create case
+      comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -454,3 +772,46 @@ Unlock Device by UUID:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or interact with `siemplify.target_entities`.
+      It strictly uses the explicitly provided 'Device UUID' parameter to perform
+      its operation. Therefore, it does not run on any entities.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action unlocks a mobile device via an MDM solution (MobileIron). This does
+      not strictly align with 'Uncontain Host' (which refers to removing network isolation
+      via EDR) or 'Enable Identity' (which refers to user accounts). Therefore, it
+      does not match any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Device UUID | String | Yes | The UUID of the target device. |

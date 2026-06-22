@@ -1,64 +1,37 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Assign Security Profile To Host:
   ai_description: >-
     ### General Description
 
-    This action assigns a specified security policy (profile) to computer entities
-    within Trend Micro Deep Security. It is primarily used for containment or compliance
-    enforcement by ensuring that specific hosts are governed by the correct security
-    rules and configurations.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Security Profile Name | String | Yes | The exact name of the security policy/profile
-    in Trend Micro Deep Security that you wish to assign to the target hosts. |
-
-
-    ### Additional Notes
-
-    - The action first resolves the 'Security Profile Name' to a Policy ID and then
-    resolves each 'Hostname' entity to a Computer ID before performing the assignment.
-
-    - If a hostname cannot be found in Trend Micro Deep Security, the action will
-    skip that specific entity and continue processing others.
+    Assigns a specified security profile (policy) to target Hostname entities in Trend
+    Micro Deep Security. This action modifies the configuration of the endpoint within
+    the external system to enforce the selected security policy.
 
 
     ### Flow Description
 
-    1. **Parameter Extraction**: The action retrieves the API configuration and the
-    mandatory 'Security Profile Name' parameter.
+    1. Initializes the Trend Micro Deep Security API client using the provided credentials.
 
-    2. **Policy ID Retrieval**: It queries the Trend Micro API to find the internal
-    ID corresponding to the provided policy name.
+    2. Retrieves the policy ID corresponding to the provided 'Security Profile Name'
+    via a GET request to the Trend Micro API.
 
-    3. **Entity Iteration**: The action iterates through all provided Hostname entities.
+    3. Iterates through the target entities, filtering specifically for Hostname entities.
 
-    4. **Computer ID Resolution**: For each Hostname, it fetches the corresponding
-    Computer ID from the Trend Micro system.
+    4. For each valid Hostname, queries the API (GET request) to find the corresponding
+    computer ID.
 
-    5. **Policy Assignment**: It executes a POST request to the Trend Micro API to
-    update the computer's configuration with the new Policy ID.
+    5. Makes a POST request to the Trend Micro API to assign the retrieved policy
+    ID to the computer.
 
-    6. **Final Status**: The action returns a success message listing all hosts that
-    were successfully updated.
+    6. Returns a summary of the entities that were successfully updated.
+
+
+    ### Additional Notes
+
+    This action only operates on entities of type Hostname. Any other entity types
+    will be skipped during execution.
+  ai_short_description: >-
+    Assigns a specified security profile to target Hostname entities in Trend Micro
+    Deep Security.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -67,15 +40,52 @@ Assign Security Profile To Host:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the configuration of a computer in Trend Micro Deep Security by assigning
-      it a new policy ID via a POST request.
-    fetches_data: true
+      Assigns a specified security policy to a computer in Trend Micro Deep Security
+      via a POST request.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the Trend Micro Deep Security API to modify
+      a computer's assigned policy, which mutates external data. It does not fetch
+      data for enrichment purposes, nor does it update internal entities, create insights,
+      or add case comments.
   entity_usage:
     entity_types:
-    - HOSTNAME
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -89,44 +99,81 @@ Assign Security Profile To Host:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `if
+      entity.entity_type == EntityTypes.HOSTNAME:`. Therefore, it targets Hostname
+      entities and filters by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action assigns a security profile to a host in Trend Micro Deep Security.
+      While this modifies the host's security posture, it does not strictly align
+      with 'Contain Host' (which implies network isolation) or any other specific
+      outcome category provided.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Security Profile Name | String | Yes | Policy name. |
 Get Host Info:
   ai_description: >-
     ### General Description
 
-    Retrieves comprehensive details for computer systems managed within Trend Micro
-    Deep Security. This action identifies the target system by its hostname and fetches
-    its full configuration and status profile from the external security platform.
-
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | N/A | N/A | N/A | This action does not require any action-specific input parameters.
-    It relies on the global integration configuration (API Root, API Key, etc.). |
+    Retrieves detailed information about a specific computer (host) from Trend Micro
+    Deep Security.
 
 
     ### Flow Description
 
-    1. **Entity Filtering**: The action identifies all `HOSTNAME` entities within
-    the current alert or case context.
+    1. Initializes the Trend Micro Deep Security manager with the provided API credentials.
 
-    2. **ID Resolution**: For each hostname, it queries the Trend Micro Deep Security
-    API to find the corresponding internal `Computer ID`.
+    2. Iterates over the target entities, specifically filtering for those of type
+    `HOSTNAME`.
 
-    3. **Data Retrieval**: Using the resolved ID, the action performs a GET request
-    to fetch the complete computer information object.
+    3. For each valid hostname, queries the Trend Micro Deep Security API to resolve
+    the computer ID.
 
-    4. **Result Attachment**: The retrieved computer details are attached to the action's
-    execution results as a JSON object, mapped to the specific hostname entity.
+    4. Fetches the detailed computer information using the resolved computer ID.
+
+    5. Attaches the retrieved computer details as a JSON result to the corresponding
+    entity in the action's output.
 
 
     ### Additional Notes
 
-    This is a read-only action. It does not perform any modifications to the Trend
-    Micro Deep Security environment or the security posture of the target host.
+    This action only processes entities of type `HOSTNAME`. If an error occurs while
+    processing a specific entity, the action logs the error and continues to the next
+    entity.
+  ai_short_description: >-
+    Retrieves detailed information about a specific computer (host) from Trend Micro
+    Deep Security and attaches the results as JSON to the corresponding hostname entities.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -137,11 +184,47 @@ Get Host Info:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: true
+    reasoning: >-
+      The action makes GET requests to the Trend Micro Deep Security API to fetch
+      computer details. It does not mutate external data, update entities, create
+      insights, or modify alert data. It only adds JSON results to the action output.
   entity_usage:
     entity_types:
-    - HOSTNAME
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -155,146 +238,75 @@ Get Host Info:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using the
+      condition `entity.entity_type == EntityTypes.HOSTNAME`. Therefore, it targets
+      HOSTNAME entities and filters by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches detailed information about a computer (hostname) from Trend
+      Micro Deep Security, which matches the 'Enrich Asset' expected outcome. It does
+      not perform any other operations like updating alerts, creating tickets, or
+      mutating external state.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Security Profiles:
   ai_description: >-
     ### General Description
 
-    Retrieves a comprehensive list of all security policies (profiles) configured
-    within the Trend Micro Deep Security environment. This action is designed to provide
-    visibility into the available security postures, allowing analysts to audit configurations
-    or identify specific policy IDs needed for subsequent automation steps.
-
-
-    ### Parameters Description
-
-    This action does not require any action-specific parameters. It utilizes the following
-    integration configuration parameters:
-
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Api Root | String | Yes | The base URL of the Trend Micro Deep Security instance
-    (e.g., https://192.168.0.1:4119). |
-
-    | Api Secret Key | String | Yes | The secret key used for API authentication.
-    |
-
-    | Api Version | String | Yes | The version of the API to interact with (e.g.,
-    v1). |
-
-    | Verify SSL | Boolean | No | If enabled, the action will verify the SSL certificate
-    of the API endpoint. |
+    Retrieves all security profiles (policies) from Trend Micro Deep Security. This
+    action fetches the global list of policies configured in the Deep Security environment
+    and presents them as a data table.
 
 
     ### Flow Description
 
-    1. **Authentication**: Establishes a secure session with the Trend Micro Deep
-    Security API using the configured root URL, API version, and secret key.
+    1. Initializes the Trend Micro Deep Security manager using the integration-level
+    API credentials.
 
-    2. **Data Retrieval**: Performs a GET request to the `/policies` endpoint to fetch
-    all defined security profiles from the system.
+    2. Sends a GET request to the Deep Security API to fetch all available security
+    profiles (policies).
 
-    3. **Data Processing**: Iterates through the retrieved policies to extract key
-    metadata, specifically the Name, Description, and unique ID for each profile.
+    3. Parses the response and extracts the Name, Description, and ID for each policy.
 
-    4. **Output Generation**: Formats the extracted metadata into a CSV-compatible
-    structure and attaches it as a data table named "Security Profiles" to the Google
-    SecOps case for analyst review.
+    4. Constructs a CSV-formatted data table with the extracted information.
 
-
-    ### Additional Notes
-
-    - This action is a global utility and does not operate on specific entities (IPs,
-    Hosts, etc.).
-
-    - If no profiles are found, the action completes with a message indicating no
-    data was retrieved.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds a data table named 'Security Profiles' to the case containing the retrieved
-      policy information (Name, Description, and ID).
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Ping:
-  ai_description: >-
-    ### General Description
-
-    The Ping action is used to verify the connectivity between Google SecOps and the
-    Trend Micro Deep Security instance. It ensures that the provided credentials and
-    connection details are correct and that the network path is open. This action
-    is typically used during the initial setup or for troubleshooting connection issues.
-
-
-    ### Parameters Description
-
-    This action does not have any action-specific parameters. It utilizes the following
-    integration configuration parameters:
-
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Api Root | String | Yes | The base URL of the Trend Micro Deep Security API
-    (e.g., https://192.168.0.1:4119). |
-
-    | Api Secret Key | String | Yes | The secret key used for authenticating API requests.
-    |
-
-    | Api Version | String | Yes | The specific version of the Trend Micro API to
-    interact with (e.g., v1). |
-
-    | Verify SSL | Boolean | No | Determines whether to validate the SSL certificate
-    of the target server. |
+    5. Attaches the data table to the action results for analyst review.
 
 
     ### Additional Notes
 
-    This action does not process any entities and is strictly used for health checks
-    of the integration. It performs a read-only operation (listing computers) to verify
-    access.
-
-
-    ### Flow Description
-
-    1. **Parameter Extraction**: The action retrieves the Api Root, Api Secret Key,
-    Api Version, and Verify SSL settings from the integration configuration.
-
-    2. **Manager Initialization**: A TrendmicroManager instance is created using the
-    extracted configuration parameters.
-
-    3. **Connectivity Test**: The action calls the `test_connectivity` method, which
-    executes a GET request to the `/computers` endpoint of the Trend Micro Deep Security
-    API.
-
-    4. **Result Reporting**: If the API responds successfully, the action completes
-    with a success message. If an exception occurs (e.g., authentication failure or
-    network timeout), the action fails and reports the error details.
+    This action does not operate on specific entities and relies solely on the integration's
+    configuration parameters to authenticate and retrieve the data.
+  ai_short_description: >-
+    Retrieves all security profiles (policies) from Trend Micro Deep Security and
+    returns them as a data table.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -302,13 +314,51 @@ Ping:
     can_mutate_external_data: false
     can_mutate_internal_data: false
     can_update_entities: false
-    external_data_mutation_explanation: 'null'
+    external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: 'null'
-  categories:
-    enrichment: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a GET request to the Trend Micro Deep Security API to fetch
+      security profiles, meaning it fetches data. It does not perform any state-changing
+      operations on the external system, nor does it mutate internal SecOps data,
+      update entities, create insights, or add case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -322,60 +372,205 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It simply fetches
+      global configuration data (security profiles) from the external system without
+      referencing specific entity identifiers.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches security profiles (policies) from Trend Micro Deep Security.
+      This operation retrieves configuration data and does not match any of the predefined
+      outcome categories such as enriching assets/IOCs, containing hosts, or updating
+      alerts.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Tests connectivity to the Trend Micro Deep Security server. This action verifies
+    that the provided integration configuration credentials and network settings are
+    valid and operational.
+
+
+    ### Flow Description
+
+    1. Extracts integration-level configuration parameters (API Root, API Secret Key,
+    API Version, Verify SSL).
+
+    2. Initializes the Trend Micro Deep Security manager with the provided credentials.
+
+    3. Calls the API to list all computers as a test to verify the connection.
+
+    4. Returns a success message if the connection is established, or a failure message
+    if an error occurs.
+
+
+    ### Additional Notes
+
+    This is a standard ping action used primarily during integration setup or troubleshooting
+    to ensure the SOAR platform can successfully communicate with the Trend Micro
+    Deep Security API.
+  ai_short_description: >-
+    Tests connectivity to the Trend Micro Deep Security server by attempting to authenticate
+    and list computers.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action is a Ping script that tests connectivity to the Trend Micro Deep
+      Security API by making a GET request to list computers. It does not fetch contextual
+      data for alerts, mutate external data, or modify internal SecOps data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or interact with any entities. It solely tests the
+      integration's connection to the external API without referencing target entities.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a basic connectivity test (Ping) and does not perform any enrichment,
+      containment, ticketing, or other operations that match the available outcome
+      categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Scan Host:
   ai_description: >-
     ### General Description
 
     Requests a malware scan on specific Hostname entities using Trend Micro Deep Security.
-    This action interacts with the Trend Micro API to identify the internal ID of
-    a computer based on its hostname and then triggers a scan by updating the anti-malware
-    state of that computer.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Api Root | String | Yes | The base URL of the Trend Micro Deep Security instance
-    (e.g., `https://192.168.0.1:4119`). |
-
-    | Api Secret Key | String | Yes | The secret key used for API authentication.
-    |
-
-    | Api Version | String | Yes | The version of the Trend Micro API to be called
-    (e.g., `v1`). |
-
-    | Verify SSL | Boolean | No | If enabled, the action will verify the SSL certificate
-    of the API endpoint. |
-
-
-    ### Additional Notes
-
-    * This action specifically targets `HOSTNAME` entities. If no Hostname entities
-    are found in the scope, the action will fail to request any scans.
-
-    * The action performs a state change in Trend Micro Deep Security by setting the
-    `antiMalware` state to `on` for the target computer.
+    This action initiates a state change on the external device to enable anti-malware
+    scanning for the targeted hosts.
 
 
     ### Flow Description
 
-    1. **Initialization**: Extracts the necessary configuration parameters (API Root,
-    Secret Key, API Version, and SSL verification settings).
+    1. Initializes the Trend Micro Deep Security manager with the provided API credentials.
 
-    2. **Entity Filtering**: Iterates through the target entities and filters for
-    those of type `HOSTNAME`.
+    2. Iterates through the target entities and filters for Hostname entities.
 
-    3. **ID Retrieval**: For each identified Hostname, the action queries the Trend
-    Micro API to find the corresponding internal Computer ID.
+    3. For each valid Hostname, retrieves the corresponding computer ID from Trend
+    Micro Deep Security via a GET request.
 
-    4. **Trigger Scan**: Sends a POST request to the Trend Micro API for each Computer
-    ID to update its anti-malware state to 'on', which initiates the malware scan.
+    4. Sends a POST request to modify the computer's configuration, setting the anti-malware
+    state to 'on' to trigger a scan.
 
-    5. **Reporting**: Collects the names of successfully processed hosts and returns
-    a summary message to the Google SecOps case wall.
+    5. Returns a success message with the list of successfully processed hostnames.
+
+
+    ### Additional Notes
+
+    If a hostname cannot be found in Trend Micro Deep Security, the action will log
+    an error and skip to the next entity.
+  ai_short_description: >-
+    Requests a malware scan on specific Hostname entities using Trend Micro Deep Security
+    by enabling the anti-malware state on the target computers.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -384,15 +579,52 @@ Scan Host:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Triggers a malware scan on the target host by updating the anti-malware state
-      to 'on' via a POST request to the Trend Micro Deep Security API.
-    fetches_data: true
+      Modifies the computer configuration in Trend Micro Deep Security to turn on
+      the anti-malware state, which triggers a malware scan.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the Trend Micro Deep Security API to modify
+      a computer's configuration (turning on anti-malware state), which mutates external
+      data. It does not fetch contextual data for enrichment, nor does it update internal
+      entities, create insights, or modify case data.
   entity_usage:
     entity_types:
-    - HOSTNAME
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -406,3 +638,41 @@ Scan Host:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters using `entity.entity_type
+      == EntityTypes.HOSTNAME`. This means it targets HOSTNAME entities, filtering
+      strictly by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action triggers a malware scan on a host by modifying its anti-malware state
+      via the Trend Micro Deep Security API. This does not match any of the predefined
+      outcome categories such as Contain Host, Execute Command on the Host, or Enrich
+      Asset. Therefore, all outcome category flags are set to false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

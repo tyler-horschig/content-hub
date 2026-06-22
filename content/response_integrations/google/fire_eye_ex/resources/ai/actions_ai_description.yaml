@@ -1,125 +1,165 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Delete Quarantined Email:
   ai_description: >-
-    Deletes a specific quarantined email from the FireEye EX platform using its unique
-    Queue ID. This action is used to permanently remove emails that have been identified
-    as malicious or are no longer needed in the quarantine queue.
+    ### General Description
+
+    Deletes a specific quarantined email from FireEye EX. This action initiates a
+    state change on the external system to permanently remove the email associated
+    with the provided queue ID.
 
 
-    ### Parameters
+    ### Flow Description
 
+    1. Initializes the FireEye EX API client using the provided integration configuration.
+
+    2. Extracts the `Queue ID` parameter provided by the user or playbook.
+
+    3. Makes a POST request to the FireEye EX API (`/emailmgmt/quarantine/delete`)
+    to delete the specified quarantined email.
+
+    4. Returns a success message if the deletion is successful, or an error message
+    if the operation fails.
+
+
+    ### Additional Notes
+
+    This action requires the exact Queue ID of the quarantined email to perform the
+    deletion.
+  ai_short_description: >-
+    Deletes a specific quarantined email from FireEye EX based on its queue ID.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Deletes a quarantined email in FireEye EX based on the provided queue ID.
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a POST request to FireEye EX to delete a quarantined email
+      (can_mutate_external_data=true). It does not fetch context data, update internal
+      entities, create insights, or modify alert data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on any entities. It relies solely on the `Queue
+      ID` parameter provided as input.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: true
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action makes a POST request to FireEye EX to delete a quarantined email.
+      This directly aligns with the 'Delete Email' expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
     | Parameter | Type | Mandatory | Description |
 
     | --- | --- | --- | --- |
 
-    | Queue ID | String | Yes | The unique identifier of the email in the FireEye
-    EX quarantine queue that needs to be deleted. |
-
-
-    ### Flow Description
-
-    1. **Initialization**: The action initializes the FireEye EX manager using the
-    provided API Root, Username, and Password.
-
-    2. **Authentication**: It authenticates with the FireEye EX API to obtain a session
-    token.
-
-    3. **Deletion**: It sends a POST request to the `/emailmgmt/quarantine/delete`
-    endpoint with the specified Queue ID.
-
-    4. **Validation**: The action checks the API response to confirm if the deletion
-    was successful or if an error occurred (e.g., ID not found).
-
-    5. **Cleanup**: It logs out of the FireEye EX session and returns the execution
-    status to Google SecOps.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: true
-    can_mutate_internal_data: false
-    can_update_entities: false
-    external_data_mutation_explanation: >-
-      Permanently deletes an email record from the FireEye EX quarantine queue.
-    fetches_data: false
-    internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
+    | Queue ID | String | Yes | Specify the queue id of the email that needs to be
+    deleted. |
 Download Alert Artifacts:
   ai_description: >-
     ### General Description
 
-    Downloads alert artifacts from FireEye EX for a specific alert identified by its
-    UUID. This action retrieves a ZIP file containing the artifacts, attaches it to
-    the case within Google SecOps, and saves the file to a specified local directory
-    on the execution environment.
+    Downloads alert artifacts from FireEye EX based on a provided Alert UUID. The
+    action retrieves the artifacts as a ZIP file, attaches it to the case, and optionally
+    saves it to a specified local path.
 
 
-    ### Parameters Description
+    ### Flow Description
 
-    | Parameter | Type | Mandatory | Description |
+    1. Initializes the FireEye EX manager with the provided API credentials.
 
-    | :--- | :--- | :--- | :--- |
+    2. Makes a GET request to the FireEye EX API (`/artifacts/{alert_uuid}`) to download
+    the artifacts associated with the specified Alert UUID.
 
-    | Alert UUID | String | Yes | The unique identifier (UUID) of the FireEye EX alert
-    from which to download artifacts. |
+    3. Attaches the downloaded ZIP file to the case in Google SecOps.
 
-    | Download Path | String | Yes | The local filesystem path where the action should
-    save the downloaded ZIP file. |
+    4. If a download path is specified, saves the ZIP file to the local disk and returns
+    the absolute file path in the JSON result.
 
 
     ### Additional Notes
 
-    - This action is specifically categorized as a download action and therefore is
-    not considered an enrichment action.
-
-    - If the file already exists at the specified `Download Path`, the action will
-    fail to save the file locally but may still succeed in attaching it to the case.
-
-
-    ### Flow Description
-
-    1. **Authentication**: Connects to the FireEye EX API using provided credentials
-    and retrieves an API token.
-
-    2. **Data Retrieval**: Calls the FireEye EX artifacts endpoint using the provided
-    `Alert UUID` to download the artifact ZIP content.
-
-    3. **Case Attachment**: Encodes the ZIP content in Base64 and attaches it to the
-    Google SecOps case.
-
-    4. **Local Storage**: Attempts to save the ZIP file to the local filesystem at
-    the location specified in the `Download Path` parameter.
-
-    5. **Cleanup**: Logs out of the FireEye EX session.
+    If the file size is too large, the action will fail to attach it to the case.
+  ai_short_description: >-
+    Downloads alert artifacts as a ZIP file from FireEye EX using a specific Alert
+    UUID, attaches the file to the case, and optionally saves it to a local path.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -130,10 +170,47 @@ Download Alert Artifacts:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to FireEye EX to fetch alert artifacts (fetches_data=true).
+      It does not mutate external data, update entities, create insights, modify alert
+      data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -147,102 +224,82 @@ Download Alert Artifacts:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not use or iterate over any entities. It operates solely based
+      on the provided Alert UUID parameter.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: true
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action downloads a ZIP file containing alert artifacts from FireEye EX,
+      which directly aligns with the 'Download File' category.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Alert UUID | String | Yes | Specify the alert uuid from where we need to download
+    artifacts. |
+
+    | Download Path | String | No | Specify where the action should save the files.
+    If nothing is specified, action will not save the file on the disk. |
 Download Quarantined Email:
   ai_description: >-
-    Downloads a quarantined email from FireEye EX based on a provided Queue ID. The
-    action retrieves the email content from the external system and integrates it
-    into the Google SecOps environment.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Queue ID | String | Yes | The unique identifier of the email in the FireEye
-    EX quarantine queue that needs to be downloaded. |
-
-    | Download Path | String | No | The local directory path on the runner where the
-    action should save the .eml file. If left empty, the file is only attached to
-    the case and not saved to the disk. |
+    Downloads a quarantined email from FireEye EX based on a specified queue ID. The
+    action retrieves the email content, attaches it to the case as an `.eml` file,
+    and can optionally save it to a specified local directory on the hosting server.
 
 
     ### Flow Description
 
-    1. **Authentication**: Connects to the FireEye EX API using provided credentials
-    and retrieves an API token.
+    1. Initializes the FireEye EX API client with the provided credentials.
 
-    2. **Data Retrieval**: Calls the FireEye EX endpoint to fetch the raw content
-    of the quarantined email associated with the specified Queue ID.
+    2. Makes a GET request to the FireEye EX API to download the quarantined email
+    associated with the provided Queue ID.
 
-    3. **Case Attachment**: Encodes the email content in Base64 and attaches it as
-    a file (with a .eml extension) to the current Google SecOps case.
+    3. Attaches the downloaded email content to the action's results as a base64-encoded
+    `.eml` file.
 
-    4. **Local Storage (Optional)**: If a 'Download Path' is provided, the action
-    attempts to save the email file to that specific location on the local file system.
+    4. If a Download Path is specified, saves the `.eml` file to the given local directory.
 
-    5. **Result Reporting**: Returns the local file path in the JSON results if saved
-    successfully and provides a status message regarding the attachment and download
-    status.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds the downloaded email as an attachment to the case and potentially saves
-      the file to the local disk of the execution environment.
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-List Quarantined Emails:
-  ai_description: "### General Description\nThe **List Quarantined Emails** action\
-    \ retrieves a list of emails currently held in the FireEye EX quarantine. This\
-    \ investigative tool allows security analysts to search for and identify potentially\
-    \ malicious emails that have been isolated by the system. The action supports\
-    \ filtering by time range, sender, and subject line to narrow down results.\n\n\
-    ### Parameters Description\n| Parameter | Type | Mandatory | Description |\n|\
-    \ :--- | :--- | :--- | :--- |\n| **Start Time** | String | No | Only emails created\
-    \ after this time will be returned. Format: YYYY-MM-DD'T'HH:MM:SS.SSS-HHMM. |\n\
-    | **End Time** | String | No | Only emails created before this time will be returned.\
-    \ Format: YYYY-MM-DD'T'HH:MM:SS.SSS-HHMM. |\n| **Sender Filter** | String | No\
-    \ | If specified, returns only quarantined emails from this sender address. |\n\
-    | **Subject Filter** | String | No | If specified, returns only quarantined emails\
-    \ with this specific subject. |\n| **Max Email to Return** | Integer | No | Limits\
-    \ the number of records returned. The maximum limit is 10,000 per FireEye EX API\
-    \ constraints. |\n\n### Flow Description\n1. **Authentication**: The action authenticates\
-    \ with the FireEye EX API using the provided credentials to obtain a session token.\n\
-    2. **Parameter Processing**: It extracts and validates the search filters (Start/End\
-    \ Time, Sender, Subject, and Limit).\n3. **Data Retrieval**: It executes a GET\
-    \ request to the `/emailmgmt/quarantine` endpoint on the FireEye EX appliance\
-    \ using the specified filters.\n4. **Result Formatting**: \n    - If emails are\
-    \ found, it generates a data table named \"Quarantined Emails\" containing key\
-    \ details like Sender, Subject, and Queue ID.\n    - It attaches the full raw\
-    \ data of the found emails as a JSON result.\n5. **Session Termination**: The\
-    \ action explicitly logs out of the FireEye EX API to ensure session security.\n\
-    \n### Additional Notes\n- If neither **Start Time** nor **End Time** is provided,\
-    \ the action defaults to returning quarantined emails from the last 24 hours.\n\
-    - This action does not require or process specific entities from the Google SecOps\
-    \ case; it performs a global search on the FireEye EX appliance."
+    5. Returns the absolute file path in the JSON result if the file was successfully
+    saved to disk.
+
+
+    ### Additional Notes
+
+    Ensure the provided Queue ID is valid and corresponds to an existing quarantined
+    email in FireEye EX.
+  ai_short_description: >-
+    Downloads a quarantined email from FireEye EX using its queue ID, attaches it
+    to the case, and optionally saves it to a local disk path.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -253,10 +310,47 @@ List Quarantined Emails:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data (the quarantined email content) from FireEye EX via
+      a GET request. It does not mutate external data, update entities, create insights,
+      or modify alert data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -270,53 +364,233 @@ List Quarantined Emails:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process any entities from the case. It relies
+      solely on the provided Queue ID parameter to download the email.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: true
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a specific quarantined email file from FireEye EX and saves
+      it locally or attaches it to the case. This aligns with the 'Download File'
+      expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Queue ID | String | Yes | Specify the queue id of the email that needs to be
+    downloaded. |
+
+    | Download Path | String | No | Specify where the action should save the files.
+    If nothing is specified, action will not save the file on the disk. |
+List Quarantined Emails:
+  ai_description: >-
+    ### General Description
+
+    Lists quarantined emails from FireEye EX based on specified filters such as time
+    range, sender, and subject.
+
+
+    ### Flow Description
+
+    1. Initializes connection to FireEye EX using provided credentials.
+
+    2. Extracts action parameters including Start Time, End Time, Sender Filter, Subject
+    Filter, and Max Email to Return.
+
+    3. Makes a GET request to the `/emailmgmt/quarantine` API endpoint with the specified
+    filters.
+
+    4. Retrieves the list of quarantined emails.
+
+    5. Outputs the results as a JSON array and constructs a CSV table for the case
+    wall.
+
+
+    ### Additional Notes
+
+    If Start Time and End Time are not specified, the action returns quarantined emails
+    from the last 24 hours. The maximum number of emails to return is limited to 10000
+    by FireEye EX.
+  ai_short_description: >-
+    Lists quarantined emails from FireEye EX based on specified filters such as time
+    range, sender, and subject.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a GET request to the FireEye EX API to fetch a list of quarantined
+      emails. It does not mutate external data, update entities, or create insights.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over target entities or use entity-specific identifiers.
+      It relies entirely on action parameters to fetch data.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action searches for and lists quarantined emails based on criteria like
+      sender, subject, and time. This matches the 'Search Email' expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: true
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Start Time | String | No | If specified, only emails that were created after
+    start time will be returned. If Start Time and End Time are not specified, action
+    returns quarantined emails from the last 24 hours. Format: YYYY-MM-DD'T'HH:MM:SS.SSS-HHMM
+    |
+
+    | End Time | String | No | If specified, only emails that were created before
+    end time will be returned.  If Start Time and End Time are not specified, action
+    returns quarantined emails from the last 24 hours. Format: YYYY-MM-DD'T'HH:MM:SS.SSS-HHMM
+    |
+
+    | Sender Filter | String | No | If specified, returns all of the quarantined emails
+    only from this sender. |
+
+    | Subject Filter | String | No | If specified, returns all of the quarantined
+    emails only with this subject. |
+
+    | Max Email to Return | String | No | Specify how many emails to return. Limit
+    is 10000. This is FireEye EX limitation. |
 Ping:
   ai_description: >-
     ### General Description
 
-    Tests the connectivity between Google SecOps and the FireEye EX instance using
-    the provided configuration parameters. This action ensures that the API root,
-    credentials, and network settings are correct by attempting a login and subsequent
-    logout.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | API Root | String | Yes | The base URL of the FireEye EX server. |
-
-    | Username | String | Yes | The username used for authentication. |
-
-    | Password | String | Yes | The password used for authentication. |
-
-    | Verify SSL | Boolean | No | If enabled, the action will verify the SSL certificate
-    of the server. Default is False. |
-
-
-    ### Additional Notes
-
-    This action is typically used during the initial setup of the integration to verify
-    that the environment can communicate with the FireEye EX API. It does not process
-    any entities.
+    Tests connectivity to the FireEye EX server to ensure that the integration is
+    configured correctly and can communicate with the external service.
 
 
     ### Flow Description
 
-    1. **Parameter Extraction**: Retrieves the API Root, Username, Password, and SSL
-    verification settings from the integration configuration.
+    1. Initializes the connection using the integration's configured API Root, Username,
+    Password, and SSL verification settings.
 
-    2. **Authentication**: Initializes the FireEye EX Manager, which automatically
-    performs a POST request to the `/auth/login` endpoint to retrieve an API token.
+    2. Attempts to authenticate by making a POST request to the `/auth/login` endpoint
+    to retrieve an API token.
 
-    3. **Session Termination**: Calls the logout method, which performs a POST request
-    to the `/auth/logout` endpoint to invalidate the session token.
+    3. Immediately makes a POST request to the `/auth/logout` endpoint to invalidate
+    the session and confirm full communication capabilities.
 
-    4. **Result Reporting**: If both steps succeed, the action reports a successful
-    connection. If any step fails (e.g., invalid credentials or unreachable URL),
-    it catches the exception and reports a failure.
+    4. Returns a success status if both operations complete without errors, or a failure
+    status if an exception occurs.
+
+
+    ### Additional Notes
+
+    This action relies entirely on the integration-level configuration and does not
+    require any action-specific parameters or entities to run.
+  ai_short_description: >-
+    Tests connectivity to the FireEye EX server by attempting to log in and log out
+    using the configured integration credentials.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -327,10 +601,48 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action authenticates to the FireEye EX server and immediately logs out to
+      verify connectivity. It does not fetch contextual data for alerts/entities,
+      mutate external business data, mutate internal data, update entities, create
+      insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -344,40 +656,68 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or interact with any entities. It solely uses integration
+      configuration parameters to test connectivity to the external system.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      This action is a simple connectivity test (ping). It does not enrich indicators,
+      modify alerts, interact with tickets, block/allow IOCs, or perform any other
+      operations that match the defined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Release Quarantined Email:
   ai_description: >-
-    Releases a quarantined email from the FireEye EX platform using a specific Queue
-    ID. This action is used to deliver emails that were previously flagged and held
-    in quarantine by the FireEye EX appliance.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Queue ID | String | Yes | The unique identifier of the email in the FireEye
-    EX quarantine queue that needs to be released. |
+    Releases a quarantined email in FireEye EX based on a provided Queue ID. This
+    action initiates a state change on the external system to deliver the previously
+    blocked email.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action retrieves the FireEye EX connection details
-    (API Root, Username, Password) and the target Queue ID.
+    1. Initializes the FireEye EX manager with API credentials.
 
-    2. **Authentication**: Connects to the FireEye EX API to obtain an authentication
-    token.
+    2. Extracts the `Queue ID` parameter.
 
-    3. **Release Request**: Sends a POST request to the FireEye EX management endpoint
-    to release the email associated with the provided Queue ID.
+    3. Makes a POST request to the FireEye EX API (`/emailmgmt/quarantine/release`)
+    to release the specified email.
 
-    4. **Validation**: Checks the response from the API to ensure the email was successfully
-    released. If the API returns an error message for the specific ID, the action
-    fails.
+    4. Returns a success or failure message based on the API response.
 
-    5. **Cleanup**: Logs out of the FireEye EX session and reports the final status
-    to the SOAR.
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Releases a specific quarantined email in FireEye EX using its Queue ID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -386,14 +726,50 @@ Release Quarantined Email:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Changes the state of an email in FireEye EX from 'quarantined' to 'released',
-      allowing the email to be delivered to its recipient.
+      Releases a quarantined email in FireEye EX based on its queue ID.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the FireEye EX API to release a quarantined
+      email, which mutates external data. It does not fetch data, update internal
+      entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -407,3 +783,44 @@ Release Quarantined Email:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on entities. It relies entirely on the provided
+      'Queue ID' parameter to identify the email to release.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action makes a POST request to FireEye EX to release a quarantined email.
+      This modifies the state of the email, aligning with the 'Update Email' category.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: true
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Queue ID | String | Yes | Specify the queue id of the email that needs to be
+    released. |

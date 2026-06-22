@@ -1,52 +1,35 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Block Address:
   ai_description: >-
-    Blocks IP addresses by adding them to a specified Network Group in Cisco Firepower
-    Management Center. This action modifies the configuration of the external firewall
-    system to enforce network restrictions on the target entities.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Network Group Name | String | Yes | The name of the existing Network Group in
-    Cisco Firepower where the IP addresses should be added. |
+    Blocks specific IP address entities on Cisco Firepower Management Center by assigning
+    them to a specified network group attached to a policy. This action initiates
+    a state change on the external firewall device to prevent network traffic to or
+    from the specified IP addresses.
 
 
     ### Flow Description
 
-    1. **Authentication:** Connects to the Cisco Firepower Management Center using
-    the provided credentials and retrieves an authentication token.
+    1. Retrieves the target network group object from Cisco Firepower Management Center
+    using the provided `Network Group Name` via a GET request.
 
-    2. **Group Retrieval:** Fetches the details of the Network Group specified in
-    the parameters to obtain its unique identifier and current member list.
+    2. Iterates through the target entities, filtering specifically for IP Address
+    entities.
 
-    3. **Entity Filtering:** Identifies all `ADDRESS` entities within the current
-    Google SecOps context.
+    3. For each valid IP address, makes a PUT request to the Cisco Firepower API to
+    append the IP address to the network group's literals, effectively blocking it.
 
-    4. **External Mutation:** For each address entity, the action checks if the IP
-    is already a member of the group. If not, it appends the IP to the group's member
-    list and performs a `PUT` request to update the Network Group on the Cisco Firepower
-    server.
+    4. Returns a summary message detailing which entities were successfully blocked
+    and any errors encountered.
 
-    5. **Reporting:** Returns a summary message listing the entities that were successfully
-    blocked and details any errors encountered during the process.
+
+    ### Additional Notes
+
+    The network group must already exist and be attached to a blocking policy in Cisco
+    Firepower Management Center for the block to be effective.
+  ai_short_description: >-
+    Blocks specific IP address entities on Cisco Firepower Management Center by adding
+    them to a designated network group.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -55,15 +38,51 @@ Block Address:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      The action performs a PUT request to the Cisco Firepower API to update a Network
-      Group object, adding new IP addresses to its configuration.
-    fetches_data: true
+      Updates a network group object in Cisco Firepower Management Center to include
+      the target IP addresses, effectively blocking them.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PUT request to the Cisco Firepower API to update a network
+      group object, which mutates external data. It does not fetch contextual enrichment
+      data, nor does it mutate internal SecOps data, update entities, or create insights.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -77,57 +96,81 @@ Block Address:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
-Block Port:
-  ai_description: >-
-    Blocks a specific network port within Cisco Firepower Management Center (FMC)
-    by assigning it to a designated port object group. This action is used to enforce
-    network security policies by dynamically updating port groups that are typically
-    attached to access control policies.
-
-
-    ### Parameters Description
-
-
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using the
+      condition `entity.entity_type == EntityTypes.ADDRESS`. Therefore, it targets
+      ADDRESS entities and filters strictly by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: true
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action performs a PUT request to a Cisco Firepower Management Center to
+      add an IP address to a network group. This directly aligns with the 'Add IOC
+      To Blocklist' expected outcome, as it updates security controls to prevent future
+      interaction with the IOC.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
     | Parameter | Type | Mandatory | Description |
 
-    | :--- | :--- | :--- | :--- |
+    | --- | --- | --- | --- |
 
-    | Port Group Name | String | Yes | The name of the existing port object group
-    in Cisco FMC where the port will be added. |
+    | Network Group Name | String | Yes | Network object name. |
+Block Port:
+  ai_description: >-
+    ### General Description
 
-    | Port | String | Yes | The specific port number to block (e.g., '443', '8080').
-    |
-
-    | Port Protocol | String | Yes | The protocol associated with the port (e.g.,
-    'TCP', 'UDP'). |
+    Blocks a specific port by assigning it to a designated port group attached to
+    a policy in Cisco Firepower Management Center. This action modifies the firewall
+    configuration to prevent traffic on the specified port and protocol.
 
 
     ### Flow Description
 
+    1. Retrieves the specified port group object from Cisco Firepower Management Center
+    using the provided `Port Group Name`.
 
-    1. **Authentication**: The action authenticates with the Cisco FMC API using provided
-    credentials to obtain a domain UUID and access tokens.
+    2. Checks if the target port is already present within the retrieved port group.
 
-    2. **Group Retrieval**: It searches for the port object group specified in the
-    'Port Group Name' parameter to retrieve its unique identifier and current members.
+    3. If the port is not already blocked, makes an API call to create a new port
+    object with the specified `Port` and `Port Protocol`.
 
-    3. **Duplicate Check**: The action checks if the specified port is already a member
-    of the group. If it is, the action completes successfully without making changes.
+    4. Makes a PUT request to update the port group object, appending the newly created
+    port object to its list of blocked ports.
 
-    4. **Object Creation**: If the port is not in the group, the action creates a
-    new 'Protocol Port Object' in FMC for the specified port and protocol.
-
-    5. **Group Update**: The action performs a PUT request to update the port object
-    group, appending the newly created port object to the group's member list.
+    5. Returns a success message indicating that the port was successfully blocked.
 
 
     ### Additional Notes
 
-
-    * This action does not run on entities; it relies entirely on the manual input
-    parameters provided in the playbook or by the user.
-
-    * The port group must already exist in Cisco FMC for this action to succeed.
+    The specified port group must already exist in Cisco Firepower Management Center
+    and should be attached to an active access policy for the block to take effect.
+  ai_short_description: >-
+    Blocks a specific port by assigning it to a designated port group attached to
+    a policy in Cisco Firepower Management Center.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -136,14 +179,52 @@ Block Port:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Creates a new Protocol Port Object and updates an existing Port Object Group
-      in Cisco Firepower Management Center to include the new port.
-    fetches_data: true
+      Creates a new port object and updates the specified port group object on Cisco
+      Firepower Management Center to block the port.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action mutates external data by creating a new port object and updating
+      a port group object in Cisco Firepower Management Center via POST and PUT requests.
+      It does not fetch contextual data for enrichment, nor does it mutate internal
+      SecOps data like entities, insights, alerts, or case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -157,39 +238,81 @@ Block Port:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on any entities. It relies entirely on the provided
+      action parameters (Port Group Name, Port, Port Protocol) to perform its operations.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action blocks a specific port on a firewall. While it updates security controls,
+      a port is not typically classified as an IOC (Indicator of Compromise) in the
+      context of the 'Add IOC To Blocklist' category, which usually applies to IPs,
+      domains, URLs, or hashes. Therefore, it does not strictly match any of the predefined
+      outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Port Group Name | String | Yes | Name of the port object group. |
+
+    | Port | String | Yes | Port to block, e.g. 9856. |
+
+    | Port Protocol | String | Yes | Target port protocol, e.g. TCP. |
 Block URL:
   ai_description: >-
-    Blocks URL entities by adding them to a specified URL group in Cisco Firepower
-    Management Center (FMC). This action is used to dynamically update security policies
-    by modifying group objects that are typically associated with access control rules.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | URL Group Name | String | Yes | The name of the existing URL group object in
-    Cisco Firepower where the URLs will be added. |
+    Blocks specific URL entities by assigning them to a designated URL group within
+    Cisco Firepower Management Center.
 
 
     ### Flow Description
 
-    1. **Authentication:** Connects to the Cisco Firepower Management Center and retrieves
-    the necessary authentication tokens and Domain UUID.
+    1. Retrieves the specified URL group object from Cisco Firepower Management Center
+    using the provided `URL Group Name`.
 
-    2. **Group Retrieval:** Fetches the details of the URL group specified in the
-    'URL Group Name' parameter to obtain its unique ID and current members.
+    2. Iterates through the target URL entities.
 
-    3. **Entity Filtering:** Identifies all URL entities within the current Google
-    SecOps context.
+    3. For each URL, makes a PUT request to the Cisco Firepower API to append the
+    URL to the URL group's literals, effectively blocking it.
 
-    4. **Mutation:** For each URL entity, it appends the URL to the group's list of
-    literals.
+    4. Returns a summary of successfully blocked URLs and any errors encountered.
 
-    5. **Update:** Sends a PUT request to the Cisco FMC API to update the URL group
-    object with the new list of blocked URLs.
+
+    ### Additional Notes
+
+    The URL group must already exist in Cisco Firepower Management Center and be attached
+    to an active policy for the block to take effect.
+  ai_short_description: >-
+    Blocks specific URL entities by assigning them to a designated URL group within
+    Cisco Firepower Management Center.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -198,15 +321,52 @@ Block URL:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the configuration of a URL Group object in Cisco Firepower Management
-      Center by adding new URL literals via a PUT request.
-    fetches_data: true
+      Updates a URL group in Cisco Firepower Management Center by appending the target
+      URL to its list of literals.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PUT request to the Cisco Firepower API to update a URL group,
+      which mutates external data. It does not fetch contextual enrichment data for
+      the entities, nor does it mutate internal SecOps data, update entities, or create
+      insights.
   entity_usage:
     entity_types:
-    - DestinationURL
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: true
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -220,55 +380,81 @@ Block URL:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The script iterates over `siemplify.target_entities` and filters them using
+      the condition `entity.entity_type == EntityTypes.URL`. Therefore, it targets
+      URL entities and filters strictly by entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: true
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates a URL group in Cisco Firepower Management Center to include
+      the target URL, effectively blocking it. This aligns with the 'Add IOC To Blocklist'
+      expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | URL Group Name | String | Yes | URL group object name. |
 Get Addresses List By Name:
   ai_description: >-
     ### General Description
 
-    The **Get Addresses List By Name** action retrieves a list of addresses (IPs or
-    Hosts) contained within a specific network group in Cisco Firepower Management
-    Center (FMC). This utility action allows security analysts to programmatically
-    inspect the contents of network groups to verify blocklists or allowed lists without
-    needing to navigate the FMC UI.
-
-
-    ### Parameters Description
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Network Group Name** | String | Yes | The exact name of the network group
-    in Cisco FMC to query for its member addresses. |
+    Retrieves a list of blocked addresses from a specific network group in Cisco Firepower
+    Management Center based on the provided network group name.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action initializes the Cisco Firepower Manager using
-    the integration's configuration parameters, including the API Root, credentials,
-    and SSL verification settings.
+    1. Initializes the connection to Cisco Firepower Management Center using the provided
+    integration credentials.
 
-    2. **Group Lookup**: It searches for the network group by name by querying the
-    FMC API. This involves a paginated search to find the unique identifier (UUID)
-    associated with the provided group name.
+    2. Makes a GET request to the Cisco Firepower API to fetch the network group object
+    matching the provided `Network Group Name`.
 
-    3. **Data Extraction**: Once the group is identified, the action fetches the full
-    group object and extracts the 'literals' list, which contains the individual address
-    values defined in that group.
+    3. Extracts the list of addresses (literals) from the retrieved network group
+    object.
 
-    4. **Result Generation**:
-        *   The raw network group JSON object is added to the action's results.
-        *   A data table is constructed and displayed in the SOAR interface, listing
-    all found addresses.
-        *   A comma-separated string of the addresses is returned as the action's
-    primary result value.
+    4. Returns the full network group object as a JSON result and constructs a data
+    table containing the extracted addresses.
+
+    5. Outputs a comma-separated list of the addresses as the action's result value.
+
 
     ### Additional Notes
 
-    * This action does not process entities from the SOAR case; it relies entirely
-    on the provided **Network Group Name** parameter.
-
-    * If the group name is not found or the group contains no addresses, the action
-    will report the appropriate status and an empty result.
+    If no addresses are found within the specified network group, the action will
+    complete successfully but indicate that no addresses were found in the output
+    message.
+  ai_short_description: >-
+    Retrieves a list of blocked addresses from a specific network group in Cisco Firepower
+    Management Center by its name.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -279,10 +465,47 @@ Get Addresses List By Name:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data (network group objects and addresses) from Cisco Firepower
+      via GET requests. It does not mutate external data, mutate internal data, update
+      entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -296,51 +519,78 @@ Get Addresses List By Name:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It relies solely
+      on the 'Network Group Name' parameter to fetch data from the external system.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches a list of addresses from a network group configuration in
+      Cisco Firepower. It does not enrich a specific IOC, mutate blocklists, or match
+      any of the other predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Network Group Name | String | Yes | The name of the needed network group. |
 Get Ports List By Name:
   ai_description: >-
     ### General Description
 
-    The **Get Ports List By Name** action retrieves a list of ports associated with
-    a specific port group from the Cisco Firepower Management Center (FMC). This action
-    is designed to query the FMC configuration to identify which ports are members
-    of a named group, facilitating auditing and policy verification.
-
-
-    ### Parameters Description
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Port Group Name** | String | Yes | The exact name of the port group in Cisco
-    FMC for which you want to retrieve the port list. |
+    Retrieves a list of ports associated with a specific port group name from Cisco
+    Firepower Management Center. This action is useful for understanding the configuration
+    of port groups and identifying which ports are included in a specific group.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action initializes a connection to the Cisco FMC API
-    using the configured credentials and retrieves a domain UUID and authentication
-    tokens.
+    1. Retrieves the `Port Group Name` parameter provided by the user.
 
-    2. **Search**: It queries the FMC for all port group objects and iterates through
-    the results to find a match for the provided **Port Group Name**.
+    2. Queries the Cisco Firepower Management Center API to fetch all port group objects
+    and identifies the one matching the provided name.
 
-    3. **Data Retrieval**: Once the group is found, the action fetches the full details
-    of that specific port group object by its ID to access the list of member port
-    objects.
+    3. Fetches the detailed port group object using its ID.
 
-    4. **Output Generation**:
-        *   The raw JSON object representing the port group is added to the action
-    results.
-        *   A data table is created listing the ports found within the group.
-        *   A comma-separated string of the port numbers is returned as the main result
-    value.
+    4. Extracts the list of ports from the retrieved object.
+
+    5. Returns the port group object as a JSON result, constructs a CSV table containing
+    the ports list, and outputs a comma-separated list of the ports.
+
 
     ### Additional Notes
 
-    This action does not process or filter Google SecOps entities (such as IP addresses
-    or Hostnames). It is a utility action that queries global configuration data from
-    the Cisco FMC based on a user-provided parameter.
+    If no ports are found for the specified group, the action will complete successfully
+    but indicate that no ports were found in the output message.
+  ai_short_description: >-
+    Retrieves a list of ports associated with a specific port group name from Cisco
+    Firepower Management Center.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -351,10 +601,47 @@ Get Ports List By Name:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data from an external system (Cisco Firepower Management
+      Center) by making GET requests to retrieve port group objects. It does not mutate
+      external data, update internal entities, create insights, or modify alert data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -368,47 +655,131 @@ Get Ports List By Name:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on any entities. It relies solely on the provided
+      'Port Group Name' parameter to fetch data from the external system.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves configuration data (a list of ports for a group) from Cisco
+      Firepower Management Center. It does not enrich IOCs or assets, modify alerts,
+      manage tickets, block/allow IOCs, manage identities, or perform any operations
+      that match the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Port Group Name | String | Yes | The name of the needed ports group. |
 Get URL List By Name:
-  ai_description: "### General Description\nThe **Get URL List By Name** action retrieves\
-    \ a list of URLs from a specific URL group defined in Cisco Firepower Management\
-    \ Center (FMC). This action is designed to provide visibility into the contents\
-    \ of URL objects within the firewall configuration, allowing security analysts\
-    \ to audit or verify blocked or allowed URL lists programmatically.\n\n### Parameters\n\
-    | Parameter Name | Type | Mandatory | Description |\n| :--- | :--- | :--- | :---\
-    \ |\n| URL Group Name | String | Yes | The exact name of the URL group in Cisco\
-    \ FMC from which to retrieve the URLs. |\n\n### Flow Description\n1. **Authentication**:\
-    \ The action connects to the Cisco FMC API using the configured credentials to\
-    \ obtain an authentication token and the domain UUID.\n2. **Group Identification**:\
-    \ It queries the FMC for all URL groups and iterates through the results to find\
-    \ the unique identifier (ID) of the group matching the provided 'URL Group Name'.\n\
-    3. **URL Retrieval**: Once the group ID is identified, the action performs a targeted\
-    \ GET request to fetch the full details of that group, specifically extracting\
-    \ the 'literals' which contain the individual URL entries.\n4. **Output Generation**:\
-    \ \n    - The full URL group object is added to the action's JSON results.\n \
-    \   - A data table is created in the case wall displaying the list of URLs found\
-    \ in the group.\n    - A comma-separated string of all URLs is returned as the\
-    \ action's result value for use in downstream playbook logic.\n\n### Additional\
-    \ Notes\n- This action does not operate on entities (e.g., IPs, Domains) from\
-    \ the alert context; it is a configuration query action.\n- If the specified URL\
-    \ group name is not found, the action will fail with an error message.\n- If the\
-    \ group exists but is empty, the action will complete successfully with a message\
-    \ indicating no URLs were found."
+  ai_description: >-
+    ### General Description
+
+    Retrieves a list of URLs associated with a specific URL group name from Cisco
+    Firepower Management Center.
+
+
+    ### Flow Description
+
+    1. Initializes the connection to the Cisco Firepower Management Center API.
+
+    2. Fetches all URL groups using a GET request to identify the group matching the
+    provided `URL Group Name`.
+
+    3. Makes a subsequent GET request to retrieve the specific URL group object by
+    its ID.
+
+    4. Extracts the URLs from the group's literals.
+
+    5. Returns the raw JSON result and constructs a CSV data table containing the
+    list of URLs.
+
+
+    ### Additional Notes
+
+    If no URLs are found for the specified group, the action will output a message
+    indicating that no URLs were found.
+  ai_short_description: >-
+    Retrieves a list of URLs associated with a specific URL group name from Cisco
+    Firepower Management Center.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action adds a data table to the Google SecOps case containing the list of
-      URLs retrieved from the Cisco FMC URL group.
-  categories:
-    enrichment: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from the Cisco Firepower Management Center API using
+      GET requests to retrieve URL group details. It does not mutate external data,
+      mutate internal data, update entities, create insights, modify alert data, or
+      create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -422,46 +793,77 @@ Get URL List By Name:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process `siemplify.target_entities`. It
+      relies solely on the provided 'URL Group Name' parameter to fetch data. Therefore,
+      all entity type and filter flags are set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches configuration data (a list of URLs in a group) from Cisco
+      Firepower Management Center. It does not enrich specific IOCs or assets, nor
+      does it mutate external state, update alerts, or perform any of the other specific
+      outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | URL Group Name | string | Yes | The name of the needed URL group. |
 Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic tool designed to verify the connectivity between
-    Google SecOps and the Cisco Firepower Management Center (FMC). Its primary purpose
-    is to ensure that the provided configuration details (API Root, Username, Password,
-    and SSL settings) are correct and that the network path is open. It performs a
-    basic authentication handshake to validate the integration's operational status.
-
-
-    ### Parameters Description
-
-    There are no parameters for this action.
-
-
-    ### Additional Notes
-
-    This action is typically used during the initial setup of the integration or for
-    troubleshooting communication issues. It does not process any entities or modify
-    any data within Cisco Firepower or Google SecOps.
+    Tests connectivity to the Cisco Firepower Management Center API to ensure the
+    integration is configured correctly.
 
 
     ### Flow Description
 
-    1. **Configuration Retrieval**: The action retrieves the integration's global
-    configuration, including the API Root URL, credentials, and SSL verification preference.
+    1. Initializes the Cisco Firepower Manager using the provided integration configuration
+    (API Root, Username, Password, Verify SSL).
 
-    2. **Manager Initialization**: It initializes the `CiscoFirepowerManager` with
-    the retrieved settings.
+    2. Attempts to authenticate by making a POST request to the `/api/fmc_platform/v1/auth/generatetoken`
+    endpoint to retrieve an authentication token and domain UUID.
 
-    3. **Authentication Request**: The manager sends a POST request to the `/api/fmc_platform/v1/auth/generatetoken`
-    endpoint.
+    3. Evaluates the response and outputs a success message if the connection is established,
+    or a failure message otherwise.
 
-    4. **Validation**: The action checks the response for a valid authentication token
-    and a `DOMAIN_UUID` header.
 
-    5. **Result Reporting**: If the authentication is successful and the UUID is retrieved,
-    it returns a 'Connection Established' message; otherwise, it reports 'Connection
-    Failed'.
+    ### Additional Notes
+
+    This action is primarily used as a diagnostic tool to verify that the provided
+    credentials and network routing are correctly configured for the integration.
+    It does not interact with or process any case entities.
+  ai_short_description: >-
+    Tests connectivity to the Cisco Firepower Management Center API by attempting
+    to authenticate and retrieve a domain UUID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -472,10 +874,48 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to generate an authentication token, but this
+      is an ephemeral session handshake and does not mutate external business data.
+      It does not fetch contextual data for alerts, nor does it update internal entities,
+      create insights, modify alerts, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -489,57 +929,75 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It solely tests the
+      connection to the external API using integration-level configurations.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping). It does not enrich IOCs, update
+      alerts, create tickets, block indicators, or perform any other operations that
+      match the expected outcomes of the available categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Unblock Address:
   ai_description: >-
     ### General Description
 
-    This action unblocks IP addresses in Cisco Firepower Management Center (FMC) by
-    removing them from a specified Network Group. It is typically used to reverse
-    a previous blocking action or to manage access control lists dynamically within
-    the FMC environment.
-
-
-    ### Parameters
-
-    | Parameter Name | Description | Type | Mandatory | Notes |
-
-    | :--- | :--- | :--- | :--- | :--- |
-
-    | Network Group Name | The name of the Network Group object in Cisco Firepower
-    from which the IP addresses should be removed. | String | Yes | The group must
-    exist and must contain at least one other address after the removal, as FMC does
-    not allow empty network groups. |
-
-
-    ### Additional Notes
-
-    - **Empty Group Constraint:** The action will raise an error if the removal of
-    an address would leave the Network Group empty. Cisco Firepower requires at least
-    one address to remain in the group.
-
-    - **Entity Scope:** This action specifically targets entities of type `ADDRESS`
-    (IP addresses).
+    Unblocks specific IP address entities from a designated network group in Cisco
+    Firepower Management Center. This action modifies the external firewall configuration
+    to restore network connectivity for the targeted IP addresses.
 
 
     ### Flow Description
 
-    1. **Authentication:** Connects to the Cisco Firepower Management Center using
-    provided credentials and retrieves an authentication token.
+    1. Retrieves the `Network Group Name` from the action parameters.
 
-    2. **Group Retrieval:** Fetches the details of the Network Group specified in
-    the `Network Group Name` parameter.
+    2. Filters the target entities to include only IP addresses (`ADDRESS`).
 
-    3. **Entity Filtering:** Identifies all `ADDRESS` entities within the current
-    SOAR context.
+    3. Fetches the network group object from Cisco Firepower using the provided name
+    via a GET request.
 
-    4. **Modification:** For each identified IP address, the script checks if it exists
-    within the Network Group's members. If found, it is removed from the list.
+    4. Iterates through the filtered IP address entities and removes each IP from
+    the network group's literals via a PUT request to the Cisco Firepower API.
 
-    5. **External Update:** Sends a `PUT` request to the FMC API to update the Network
-    Group with the modified list of addresses.
+    5. Returns a summary message detailing the successfully unblocked entities and
+    any errors encountered.
 
-    6. **Reporting:** Logs the success or failure of the unblocking operation for
-    each entity and provides a summary message.
+
+    ### Additional Notes
+
+    The action requires the network group to exist in Cisco Firepower. If the network
+    group becomes empty after unblocking, the API might reject the request, as Cisco
+    Firepower requires at least one address to remain in a network group.
+  ai_short_description: >-
+    Unblocks specific IP address entities from a designated network group in Cisco
+    Firepower Management Center.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -548,16 +1006,52 @@ Unblock Address:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      The action performs a PUT request to the Cisco Firepower Management Center API
-      to modify the membership of a Network Group, effectively removing IP addresses
-      from a blocklist or access control group.
-    fetches_data: true
+      Removes the IP address from the specified network group in Cisco Firepower Management
+      Center.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PUT request to the Cisco Firepower API to remove an IP address
+      from a network group, which mutates external data. It does not fetch contextual
+      enrichment data, nor does it mutate internal SecOps data, update entities, or
+      create insights.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -571,50 +1065,79 @@ Unblock Address:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using the
+      condition `entity.entity_type == EntityTypes.ADDRESS`. Therefore, it targets
+      ADDRESS entities and filters strictly by entity_type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action removes an IP address from a network group in Cisco Firepower, which
+      effectively unblocks it and restores connectivity. This aligns directly with
+      the 'Remove IOC From Blocklist' expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: true
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Network Group Name | String | Yes | Network object name. |
 Unblock Port:
   ai_description: >-
     ### General Description
 
-    Removes a specific port from a designated Port Object Group in Cisco Firepower
-    Management Center (FMC). This action is used to revert port blocking by modifying
-    the group configuration and deleting the associated port object.
-
-
-    ### Parameters Description
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Port Group Name | String | Yes | The name of the port object group from which
-    the port should be removed. |
-
-    | Port | String | Yes | The specific port number (e.g., '80', '443') to be unblocked.
-    |
-
-
-    ### Additional Notes
-
-    This action performs both a group membership update (PUT) and a standalone object
-    deletion (DELETE) on the Cisco FMC platform.
+    Removes a specified port from a designated port object group in Cisco Firepower
+    Management Center, effectively unblocking it and restoring connectivity for that
+    port.
 
 
     ### Flow Description
 
-    1. **Authentication**: Connects to the Cisco FMC API and retrieves an authentication
-    token.
+    1. Retrieves the port group object from Cisco Firepower Management Center using
+    the provided `Port Group Name` via a GET request.
 
-    2. **Group Retrieval**: Searches for the Port Object Group by the provided name
-    to obtain its unique identifier and current member list.
+    2. Iterates through the port objects within the group to identify the target `Port`.
 
-    3. **Membership Check**: Iterates through the group's objects to find the entry
-    matching the target port.
+    3. Removes the target port from the group's object list and sends a PUT request
+    to update the port group in Cisco Firepower Management Center.
 
-    4. **Group Update**: If found, it removes the port from the group's member list
-    and sends a PUT request to update the group on the FMC.
+    4. Sends a DELETE request to remove the standalone port object from the system.
 
-    5. **Object Deletion**: Finally, it sends a DELETE request to remove the individual
-    port object from the FMC's database.
+    5. Returns a success message indicating whether the port was successfully unblocked.
+
+
+    ### Additional Notes
+
+    This action does not operate on Google SecOps entities. It relies entirely on
+    the manually provided action parameters to identify the port and the port group.
+  ai_short_description: >-
+    Removes a specified port from a designated port object group in Cisco Firepower
+    Management Center to restore network connectivity.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -623,14 +1146,52 @@ Unblock Port:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Removes a port from a port object group and deletes the corresponding protocol
+      Updates a port object group to remove a specific port and deletes the associated
       port object in Cisco Firepower Management Center.
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action mutates external data by sending a PUT request to update a port group
+      and a DELETE request to remove a port object in Cisco Firepower Management Center.
+      It does not fetch data for enrichment purposes, nor does it mutate internal
+      SecOps data, update entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -644,53 +1205,85 @@ Unblock Port:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or interact with `siemplify.target_entities`.
+      It relies solely on the provided action parameters ('Port Group Name' and 'Port')
+      to execute its logic. Therefore, all entity types and filter flags are set to
+      false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action unblocks a network port by removing it from a port object group in
+      a firewall. While it restores connectivity, a port is a network configuration
+      element rather than a standard Indicator of Compromise (IOC) like an IP, domain,
+      or hash. Therefore, it does not strictly fit the 'Remove IOC From Blocklist'
+      category or any other available outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Port Group Name | String | Yes | Name of the port object group. |
+
+    | Port | String | Yes | Target port, e.g. 9856. |
 Unblock URL:
   ai_description: >-
     ### General Description
 
-    Removes specific URL entities from a designated URL group within Cisco Firepower
-    Management Center (FMC). This action is typically used to reverse a previous blocking
-    action by removing the URL from a group that is referenced in access control policies.
-
-
-    ### Parameters Description
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | URL Group Name | String | Yes | The exact name of the URL group object in Cisco
-    Firepower Management Center from which the URLs should be removed. |
+    Removes specific URL entities from a designated URL group in Cisco Firepower Management
+    Center, effectively unblocking them and restoring connectivity.
 
 
     ### Flow Description
 
-    1. **Authentication**: Connects to the Cisco Firepower Management Center using
-    provided credentials and retrieves an authentication token.
+    1. Retrieves the target URL group object from Cisco Firepower Management Center
+    using the provided `URL Group Name` parameter via a GET request.
 
-    2. **Group Retrieval**: Fetches the details of the URL group specified in the
-    `URL Group Name` parameter to obtain its unique identifier and current list of
-    URLs.
+    2. Iterates through the target URL entities provided in the case.
 
-    3. **Entity Filtering**: Identifies all entities of type `URL` (DestinationURL)
-    from the current context.
+    3. For each URL entity, removes its corresponding literal from the retrieved URL
+    group object.
 
-    4. **Mutation**: For each identified URL, the action searches the group's existing
-    list of literals. If a match is found, it is removed from the list.
+    4. Sends a PUT request to the Cisco Firepower Management Center API to update
+    the URL group, effectively unblocking the URLs.
 
-    5. **Update**: Sends a `PUT` request to the Cisco Firepower API to update the
-    URL group object with the modified list, effectively unblocking the URLs.
-
-    6. **Reporting**: Returns a summary of which URLs were successfully removed and
-    reports any errors encountered during the process.
+    5. Returns a summary message detailing the successfully unblocked URLs and any
+    errors encountered during the process.
 
 
     ### Additional Notes
 
-    - This action only affects the specified URL group. If the URL is blocked by other
-    rules or groups, it may remain blocked.
-
-    - The action requires the URL group to already exist in Cisco Firepower.
+    This action only operates on entities of type URL. Ensure that the specified URL
+    group exists in the Cisco Firepower Management Center.
+  ai_short_description: >-
+    Removes specific URL entities from a designated URL group in Cisco Firepower Management
+    Center to unblock them.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -699,15 +1292,51 @@ Unblock URL:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the configuration of a URL Group object in Cisco Firepower Management
-      Center by removing specific URL entries via a PUT request.
-    fetches_data: true
+      Updates a URL group object in Cisco Firepower Management Center to remove specific
+      URLs, effectively unblocking them.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action mutates external data by sending a PUT request to Cisco Firepower
+      Management Center to update a URL group and remove URLs. It does not fetch enrichment
+      data, update internal entities, or create insights.
   entity_usage:
     entity_types:
-    - DestinationURL
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: true
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -721,3 +1350,45 @@ Unblock URL:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using the
+      condition `entity.entity_type == EntityTypes.URL`. Therefore, it targets URL
+      entities and filters strictly by the `entity_type` attribute.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action removes a URL from a URL group in Cisco Firepower Management Center,
+      which restores connectivity to the URL by removing it from a restricted list.
+      This directly aligns with the 'Remove IOC From Blocklist' expected outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: true
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | URL Group Name | String | Yes | URL group object name. |

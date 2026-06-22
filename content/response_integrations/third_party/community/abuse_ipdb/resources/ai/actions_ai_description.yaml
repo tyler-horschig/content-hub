@@ -1,70 +1,100 @@
 Check IP Reputation:
   ai_description: >-
-    Checks the reputation of IP address entities using the AbuseIPDB API. This action
-    retrieves detailed threat intelligence, including abuse confidence scores, country
-    information, ISP details, and recent report history. It enriches the entities
-    within Google SecOps by adding these details as attributes and can automatically
-    mark entities as suspicious if they exceed a user-defined confidence threshold.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Exclude Internal Addresses | Boolean | No | If set to `true` (default), the
-    action will skip any IP addresses marked as internal to save API quota. |
-
-    | Suspicious Threshold | String | Yes | An abuse confidence score (0-100). If
-    the IP's score is equal to or higher than this value, the entity is marked as
-    suspicious in the platform. Set to 0 to disable this logic. |
-
-    | Create Insight | Boolean | No | If `true` (default), creates a formatted insight
-    on the entity containing key reputation data. |
-
-    | Max Age in Days | String | Yes | Specifies the time range (in days) for which
-    AbuseIPDB should check for reports. Default is 90. |
+    Checks the reputation of IP address entities using AbuseIPDB. This action retrieves
+    threat intelligence including abuse confidence score, country code, domain, and
+    ISP. It evaluates risk based on a configurable threshold, updates the entity's
+    suspicious status, enriches its properties, and optionally generates an insight
+    with the analysis results.
 
 
     ### Flow Description
 
-    1. **Filter Entities:** The action identifies all `ADDRESS` entities in the current
-    scope. If `Exclude Internal Addresses` is enabled, it filters out entities where
-    `is_internal` is true.
+    1. Extracts configuration and action parameters, including the suspicious threshold
+    and max report age.
 
-    2. **API Query:** For each valid IP, the action sends a GET request to the AbuseIPDB
-    `/check` endpoint, passing the IP and the `Max Age in Days` parameter.
+    2. Filters the target entities to include only ADDRESS entities. If configured,
+    it excludes internal addresses to save API quota.
 
-    3. **Data Enrichment:** The retrieved data (e.g., ISP, Domain, Country, Confidence
-    Score) is mapped to the entity's additional properties with the prefix `AbuseIPDB_`.
+    3. Iterates over the filtered entities.
 
-    4. **Suspicious Evaluation:** The action compares the `abuseConfidenceScore` against
-    the `Suspicious Threshold`. If the threshold is met, the entity's `is_suspicious`
-    flag is set to true.
+    4. Makes a GET request to the AbuseIPDB API (`/api/v2/check`) to retrieve the
+    IP report for each entity.
 
-    5. **Insight Generation:** If enabled, a detailed HTML insight is created for
-    the entity, summarizing the reputation findings.
+    5. Enriches the entity's `additional_properties` with the retrieved report data.
 
-    6. **Update:** The action updates the entities in the Google SecOps case and returns
-    the raw JSON data for further use in the playbook.
+    6. If the abuse confidence score is greater than or equal to the `Suspicious Threshold`,
+    marks the entity as suspicious.
+
+    7. If `Create Insight` is enabled, creates an insight containing the report details.
+
+    8. Marks the entity as enriched and updates it in the platform.
+
+    9. Adds the JSON result to the action output.
+
+
+    ### Additional Notes
+
+    - Excludes internal entities by default to save API allowance on wasted IP checks
+    against your own infrastructure.
+  ai_short_description: >-
+    Checks the reputation of IP address entities using AbuseIPDB, enriching them with
+    threat intelligence and optionally marking them as suspicious based on a confidence
+    score threshold.
   capabilities:
     can_create_case_comments: false
     can_create_insight: true
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: true
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Updates entity attributes with reputation data, sets the suspicious status based
-      on the confidence score, and creates case insights.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a GET request to the AbuseIPDB API to fetch IP reputation data
+      (fetches_data=true). It does not mutate external data or internal data outside
+      of entities. It updates entities with enrichment data and suspicious status
+      (can_update_entities=true) and creates insights if configured (can_create_insight=true).
+      It does not modify alert data or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -78,25 +108,89 @@ Check IP Reputation:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `entity.entity_type
+      == EntityTypes.ADDRESS`. It also optionally filters by `not entity.is_internal`
+      if the `Exclude Internal Addresses` parameter is true. Therefore, it targets
+      ADDRESS entities and filters by entity_type and is_internal.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: true
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches IP reputation data from AbuseIPDB, returning threat intelligence
+      such as abuse confidence score and ISP. This matches the 'Enrich IOC' expected
+      outcome. It does not perform any containment, blocklist, or ticketing operations.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Exclude Internal Addresses | Boolean | No | If true, excludes any address entities
+    that you've marked as internal, saving your API allowance on wasted IP checks
+    against your own infrastructure. |
+
+    | Suspicious Threshold | String | Yes | An abuse confidence score equal to, or
+    above this threshold will mark the entity as suspicious. Set to 0 to disable.
+    |
+
+    | Create Insight | Boolean | No | Create an insight for each IP. |
+
+    | Max Age in Days | String | Yes | Max report age to check. |
 Ping:
   ai_description: >-
-    ### General Description Tests the connectivity to the AbuseIPDB service to verify
-    that the provided API key and configuration are valid. This action is typically
-    used during the initial setup or troubleshooting of the integration. ### Parameters
-    Description | Parameter | Type | Mandatory | Description | | :--- | :--- | :---
-    | :--- | | Api Key | String | Yes | The API key required to authenticate with
-    the AbuseIPDB API. This is an integration configuration parameter. | | Verify
-    SSL | Boolean | No | If enabled, the action will verify the SSL certificate of
-    the AbuseIPDB API endpoint. This is an integration configuration parameter. Default
-    is False. | ### Flow Description 1. **Initialization**: The action retrieves the
-    API Key and SSL verification preference from the integration settings. 2. **Connectivity
-    Test**: It attempts to query the AbuseIPDB 'check' endpoint using a dummy IP address
-    (1.1.1.1). 3. **Validation**: The response is checked for success. If the API
-    key is invalid, a specific error is caught and reported. 4. **Completion**: The
-    action returns 'true' and a success message if the connection is established,
-    or 'false' with an error message if the connection fails. ### Additional Notes
-    There are no action-specific parameters; it relies entirely on the integration's
-    configuration. This action does not process or affect any entities in the environment.
+    ### General Description
+
+    Tests connectivity to the AbuseIPDB service to ensure the integration is configured
+    correctly and the API key is valid.
+
+
+    ### Flow Description
+
+    1. Extracts the integration-level configuration parameters (API Key and Verify
+    SSL).
+
+    2. Initializes the AbuseIPDB manager.
+
+    3. Executes a test connectivity request by making a GET API call to the AbuseIPDB
+    `check` endpoint using a dummy IP address (`1.1.1.1`).
+
+    4. Validates the response and returns a success message if the connection is established,
+    or an error message if the API key is invalid or the request fails.
+
+
+    ### Additional Notes
+
+    This action is typically used during the initial setup of the integration to verify
+    network connectivity and authentication credentials. It does not process any case
+    entities or modify any data.
+  ai_short_description: >-
+    Tests connectivity to the AbuseIPDB service to ensure the integration is configured
+    correctly and the API key is valid.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -105,12 +199,49 @@ Ping:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action performs a GET request to test connectivity but does not fetch contextual
+      data for alerts/entities. It does not mutate external or internal data, update
+      entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -124,3 +255,39 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It only tests connectivity
+      to the external service using a hardcoded dummy IP address.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enriching IOCs, updating alerts, or mutating
+      external systems.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

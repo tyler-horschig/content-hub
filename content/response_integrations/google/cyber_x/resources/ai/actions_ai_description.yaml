@@ -1,72 +1,89 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Enrich Endpoints:
   ai_description: >-
     ### General Description
 
-    Enriches **Hostname** and **IP Address** entities with comprehensive device information
-    retrieved from the CyberX platform. This action helps security analysts gain visibility
-    into OT/IoT devices by providing context such as device type, vendor, and operating
-    system directly within the Google SecOps environment.
-
-
-    ### Parameters Description
-
-    There are no parameters for this action.
-
-
-    ### Additional Notes
-
-    The action enriches entities by adding custom properties prefixed with `CX_` and
-    attaching a detailed data table to each successfully matched entity.
+    Enriches Endpoint entities (IP Addresses and Hostnames) by fetching device information
+    from CyberX. This action retrieves contextual metadata about the devices associated
+    with the entities to aid in investigation and asset identification.
 
 
     ### Flow Description
 
-    1. **Initialization**: Establishes a connection to the CyberX API using the integration's
-    configuration (API Root and Access Token).
+    1. Filters the target entities to include only IP Addresses and Hostnames.
 
-    2. **Entity Filtering**: Identifies all Hostname and IP Address entities within
-    the current alert context.
+    2. Iterates through the filtered entities.
 
-    3. **Data Retrieval**: For each entity, it queries the CyberX API to find matching
-    device records based on the IP address or hostname.
+    3. For each entity, makes an HTTP GET request to the CyberX API (`/api/v1/devices`)
+    to retrieve all devices and matches the device by IP address or hostname.
 
-    4. **Enrichment**:
-        - Updates the entity's `additional_properties` with the flattened device data.
-        - Adds a formatted data table to the entity for quick reference in the UI.
-    5. **Reporting**: Summarizes the enrichment results and logs any errors encountered
-    during the process.
+    4. If a matching device is found, it formats the device information into a CSV
+    table and attaches it to the action's results for the entity.
+
+    5. Updates the entity's additional properties in memory with the retrieved device
+    information.
+
+
+    ### Additional Notes
+
+    Although the action updates the entity's additional properties in memory, it does
+    not explicitly call the SDK method (`siemplify.update_entities`) to save these
+    entity updates back to the platform.
+  ai_short_description: >-
+    Enriches IP Address and Hostname entities by retrieving device information from
+    CyberX and attaching it as an entity table.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: true
+    can_mutate_internal_data: false
+    can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action updates entity additional properties with enriched device information
-      from CyberX and adds an entity data table to the entity's view.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches device data from the CyberX API via HTTP GET requests (fetches_data=true).
+      It does not perform any state-changing operations on external systems (can_mutate_external_data=false).
+      While it updates entity additional properties in memory, it does not call `siemplify.update_entities`
+      to save these changes to the platform (can_update_entities=false). It also does
+      not create insights, modify alert data, or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -80,25 +97,72 @@ Enrich Endpoints:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and filters them using
+      the condition `entity.entity_type == EntityTypes.ADDRESS or entity.entity_type
+      == EntityTypes.HOSTNAME`. Therefore, it targets Address and Hostname entities
+      and explicitly filters them by their entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches device information for IP addresses and hostnames from CyberX.
+      This aligns with the 'Enrich Asset' category, as it retrieves contextual metadata
+      for internal resources. It does not fetch threat intelligence, so it is not
+      'Enrich IOC'. It does not perform any containment, ticketing, or alert modification
+      operations.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Alerts:
-  ai_description: "### General Description\nThe **Get Alerts** action retrieves a\
-    \ comprehensive list of all security alerts detected by the CyberX XSense platform.\
-    \ This action is primarily used for visibility and reporting, allowing security\
-    \ analysts to pull the current state of alerts from the CyberX environment into\
-    \ Google SecOps for further review or documentation.\n\n### Parameters Description\n\
-    There are no input parameters for this action.\n\n### Additional Notes\nThis action\
-    \ does not operate on specific entities; it performs a global fetch of all alerts\
-    \ available in the CyberX system. The results are presented both as a formatted\
-    \ data table and as a raw JSON object.\n\n### Flow Description\n1. **Initialization**:\
-    \ The action initializes the CyberX manager using the API Root, Access Token,\
-    \ and SSL verification settings from the integration configuration.\n2. **API\
-    \ Request**: It executes a GET request to the CyberX `/api/v1/alerts` endpoint\
-    \ to retrieve the list of alerts.\n3. **Data Processing**: \n    - If alerts are\
-    \ retrieved, the action flattens the dictionary objects and constructs a CSV-formatted\
-    \ data table titled \"Result ALerts\".\n    - It calculates the total count of\
-    \ alerts found for the output message.\n4. **Output**: The action returns the\
-    \ count of alerts in the execution summary and provides the full list of alerts\
-    \ in JSON format for use in downstream playbook steps."
+  ai_description: >-
+    ### General Description
+
+    Fetches a list of all alerts detected by CyberX (XSense).
+
+
+    ### Flow Description
+
+    1. Initializes the CyberXManager with the provided API root and access token.
+
+    2. Makes an HTTP GET request to the `/api/v1/alerts` endpoint to retrieve all
+    alerts.
+
+    3. Parses the response and constructs a data table containing the alert details.
+
+    4. Returns the alerts as a JSON string and outputs the total number of alerts
+    found.
+
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Fetches a list of all alerts detected by CyberX (XSense) and returns them as a
+    data table and JSON.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -109,10 +173,47 @@ Get Alerts:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to the CyberX API to fetch a list of alerts (fetches_data=true).
+      It does not mutate external data, mutate internal data, update entities, create
+      insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -126,64 +227,128 @@ Get Alerts:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It simply fetches
+      a list of alerts from the external system without using any entity identifiers.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches a list of all alerts from CyberX. It does not enrich specific
+      IOCs or assets, nor does it modify alerts, tickets, or interact with endpoints.
+      It does not fetch information about a specific alert associated with the case.
+      Therefore, it does not match any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Connections for Endpoint:
   ai_description: >-
     ### General Description
 
-    Retrieves a list of network connections for specific endpoints (IP addresses or
-    Hostnames) from the CyberX platform. This action helps security analysts understand
-    the network activity and communication patterns of a device by fetching its connection
-    history and displaying it directly within the Google SecOps entity context.
-
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | N/A | N/A | N/A | This action does not require any input parameters. |
-
-
-    ### Additional Notes
-
-    * The action requires a valid API Root and Access Token configured in the CyberX
-    integration settings.
-
-    * It supports both IP Address (ADDRESS) and Hostname (HOSTNAME) entity types.
+    Retrieves a list of network connections for specific endpoint devices from CyberX.
+    This action helps analysts understand the network activity and communication patterns
+    of a given host or IP address.
 
 
     ### Flow Description
 
-    1. **Entity Filtering**: The action identifies all target entities in the current
-    context that are either IP Addresses or Hostnames.
+    1. Iterates through the provided target entities, filtering for IP Address and
+    Hostname entity types.
 
-    2. **Device Identification**: For each identified entity, the action queries the
-    CyberX API to find the corresponding internal Device ID based on the IP or Hostname.
+    2. For each valid entity, makes a GET request to the CyberX API to resolve the
+    entity's identifier to a specific CyberX device ID.
 
-    3. **Connection Retrieval**: Once the Device ID is obtained, the action fetches
-    the list of network connections associated with that device from CyberX.
+    3. Makes a subsequent GET request to the CyberX API to fetch the network connections
+    associated with the resolved device ID.
 
-    4. **Data Enrichment**: The retrieved connection data is flattened and attached
-    as a data table to the respective entity in Google SecOps for easy review.
+    4. Formats the retrieved connection data and attaches it to the action results
+    as an entity-specific table.
+
+
+    ### Additional Notes
+
+    If a device ID cannot be found for a given entity, or if no connections are available,
+    the action will log an error for that specific entity and continue processing
+    the remaining entities.
+  ai_short_description: >-
+    Retrieves a list of network connections for specific endpoint devices (IP Addresses
+    and Hostnames) from CyberX and attaches the data as entity tables.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds a data table to the entity in Google SecOps containing the network connection
-      information retrieved from CyberX.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from the CyberX API using GET requests to retrieve device
+      IDs and their associated connections. It does not perform any state-changing
+      operations on external systems (no POST/PUT/DELETE). It also does not mutate
+      internal SecOps data, update entities, or create insights; it only attaches
+      an entity table to the action's results.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -197,67 +362,131 @@ Get Connections for Endpoint:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and explicitly filters
+      them using `entity.entity_type == EntityTypes.ADDRESS or entity.entity_type
+      == EntityTypes.HOSTNAME`. Therefore, it targets Address and Hostname entities
+      and filters by entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches network connection data for specific endpoint devices (hostnames
+      and IP addresses). This aligns with the 'Enrich Asset' category, as it retrieves
+      contextual metadata regarding the resource's network activity.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Device Vulnerability Report:
   ai_description: >-
     ### General Description
 
-    The **Get Device Vulnerability Report** action retrieves detailed vulnerability
-    information for specific endpoints from the CyberX platform. It allows security
-    analysts to see the security posture and known vulnerabilities of devices identified
-    as IP addresses or Hostnames within a case, providing critical context for incident
-    response and risk assessment.
-
-
-    ### Parameters Description
-
-    There are no user-configurable parameters for this action. It relies on the global
-    CyberX integration configuration, specifically the **API Root**, **Access Token**,
-    and **Verify SSL** settings.
+    Fetches vulnerability reports for endpoint entities (IP Addresses and Hostnames)
+    from CyberX. This action retrieves detailed vulnerability data for the specified
+    assets and attaches the results to the entities within the SecOps platform for
+    analyst review.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action initializes a connection to the CyberX API using
-    the configured credentials.
+    1. Initializes the CyberX API client using the provided integration configurations.
 
-    2. **Entity Filtering**: It identifies and filters the target entities in the
-    current SOAR context, focusing exclusively on `ADDRESS` (IP) and `HOSTNAME` types.
+    2. Filters the target entities to include only IP Addresses (`ADDRESS`) and Hostnames
+    (`HOSTNAME`).
 
-    3. **Data Retrieval**: The action performs a single GET request to the CyberX
-    `/api/v1/reports/vulnerabilities/devices` endpoint to fetch the master list of
-    all device vulnerability reports.
+    3. Makes a single HTTP GET request to the CyberX API (`/api/v1/reports/vulnerabilities/devices`)
+    to retrieve all device vulnerability reports.
 
-    4. **Matching Logic**: It iterates through the filtered entities and attempts
-    to match each one against the retrieved reports. Matching is performed by IP address
-    for `ADDRESS` entities and by device name for `HOSTNAME` entities.
+    4. Iterates through the filtered entities and matches their identifiers (IP or
+    Hostname) against the retrieved vulnerability reports.
 
-    5. **Enrichment**: For every matching device found, the action flattens the vulnerability
-    data and attaches it as a structured data table to the corresponding entity within
-    the Google SecOps platform.
+    5. If a matching report is found for an entity, the action formats the report
+    data and attaches it as an entity table to the respective entity in the case.
 
 
     ### Additional Notes
 
-    If no matching reports are found for the provided entities, the action will complete
-    successfully but will report that no vulnerability data was found.
+    To optimize performance and minimize API calls, the action fetches all vulnerability
+    reports at once and performs the matching logic locally.
+  ai_short_description: >-
+    Fetches vulnerability reports for endpoint entities (IP Addresses and Hostnames)
+    from CyberX and attaches the results as entity tables.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds a vulnerability report data table to the identified entities within the
-      Google SecOps case.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes an HTTP GET request to the CyberX API to fetch vulnerability
+      reports, meaning it fetches data. It does not perform any POST/PUT/DELETE requests
+      to mutate external data. Internally, it only adds entity tables to the case,
+      which does not constitute mutating internal data, updating entities, creating
+      insights, modifying alert data, or creating case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -271,104 +500,72 @@ Get Device Vulnerability Report:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and explicitly filters them
+      using the condition `entity.entity_type == EntityTypes.ADDRESS or entity.entity_type
+      == EntityTypes.HOSTNAME`. Therefore, it targets Address and Hostname entities
+      and filters them by their entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves vulnerability reports for endpoints (IPs and Hostnames)
+      from CyberX, which provides contextual metadata about the assets. This directly
+      matches the 'Enrich Asset' expected outcome. It does not modify external state,
+      update alerts, or perform other categorized actions.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Events:
-  ai_description: "### General Description\nThe **Get Events** action retrieves a\
-    \ comprehensive list of events currently recorded in the CyberX event log. This\
-    \ utility action is designed to provide visibility into system-level activities\
-    \ and security events monitored by the CyberX platform, allowing analysts to review\
-    \ historical or recent event data within the Google SecOps environment.\n\n###\
-    \ Parameters Description\nThere are no parameters for this action.\n\n### Additional\
-    \ Notes\nThis action does not require or process any entities. It performs a global\
-    \ fetch of events from the CyberX instance.\n\n### Flow Description\n1. **Authentication**:\
-    \ The action initializes the CyberX manager using the API Root, Access Token,\
-    \ and SSL verification settings provided in the integration configuration.\n2.\
-    \ **API Request**: It performs a GET request to the CyberX `/api/v1/events` endpoint\
-    \ to retrieve the event log.\n3. **Data Transformation**: The retrieved list of\
-    \ event objects is processed and flattened to ensure compatibility with tabular\
-    \ displays.\n4. **Result Presentation**: \n    * If events are found, they are\
-    \ formatted into a CSV-style data table titled 'Result Events' and attached to\
-    \ the action results.\n    * The raw JSON response is returned as the script output.\n\
-    \    * A summary message indicates the total number of events found."
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: false
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic tool used to verify the connectivity between
-    Google SecOps and the CyberX platform. It ensures that the integration is correctly
-    configured and that the service is reachable using the provided credentials.
-
-
-    ### Parameters Description
-
-    This action does not have any direct action parameters. It relies on the global
-    integration configuration:
-
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | API Root | String | Yes | The base URL of the CyberX instance (e.g., `https://cyberx-server.com`).
-    |
-
-    | Access Token | String | Yes | The API token used to authenticate requests to
-    the CyberX API. |
-
-    | Verify SSL | Boolean | No | Determines whether to verify the SSL certificate
-    of the CyberX server. Defaults to `false`. |
+    Fetches a list of events reported to the event log from CyberX.
 
 
     ### Flow Description
 
-    1. **Configuration Retrieval:** The action fetches the API Root, Access Token,
-    and SSL verification settings from the CyberX integration configuration.
+    1. Initializes the connection to the CyberX API using the provided integration
+    configuration.
 
-    2. **Manager Initialization:** It initializes the `CyberXManager` with the retrieved
-    settings.
+    2. Makes a GET request to the `/api/v1/events` endpoint to retrieve the list of
+    events.
 
-    3. **Connectivity Test:** The action executes the `get_all_devices` method, which
-    performs a `GET` request to the `/api/v1/devices` endpoint.
+    3. If events are found, formats the data into a CSV and attaches it as a data
+    table to the action results.
 
-    4. **Result Handling:** If the API call is successful, the action concludes with
-    a success status and a "Connection established" message. If the call fails (e.g.,
-    due to invalid credentials or network issues), an exception is raised, indicating
-    a connection failure.
+    4. Returns the raw event data as a JSON string in the action's output.
 
 
     ### Additional Notes
 
-    - This action does not process any entities and is strictly used for system health
-    checks.
-
-    - As per standard SOAR practices, this action is excluded from being categorized
-    as an enrichment action despite fetching data.
+    This action does not require any specific parameters and will fetch all available
+    events from the event log.
+  ai_short_description: >-
+    Fetches a list of events reported to the event log from CyberX.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -379,10 +576,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to the CyberX API to fetch event data. It does
+      not mutate external data, update internal entities, create insights, modify
+      alerts, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -396,3 +630,170 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process any entities. It simply fetches
+      events from the external system without any entity-based filtering or context.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a list of events from the CyberX event log, which aligns
+      with the 'Search Events' category as it returns a collection of historical logs
+      or telemetry data.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: true
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Tests connectivity to the CyberX platform. This action is used to verify that
+    the integration is configured correctly and can successfully communicate with
+    the CyberX API.
+
+
+    ### Flow Description
+
+    1. Initializes the CyberX manager using the provided integration configurations
+    (API Root, Access Token, Verify SSL).
+
+    2. Makes a GET request to the CyberX API to fetch all devices (`/api/v1/devices`)
+    as a proof of connectivity.
+
+    3. Returns a success message to the SecOps platform if the connection is established
+    and the API responds without errors.
+
+
+    ### Additional Notes
+
+    This is a utility action primarily used for testing integration settings. It does
+    not process specific entities, nor does it return detailed data or insights to
+    the case.
+  ai_short_description: >-
+    Tests connectivity to the CyberX platform by attempting to fetch a list of devices
+    from the API.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a GET request to the CyberX API to test connectivity. Although
+      it retrieves a list of devices, it does not fetch contextual data for alerts/entities
+      to be used in the case. It does not mutate external data, update internal entities,
+      create insights, or modify alert data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `target_entities` or use any entity-specific
+      identifiers. It solely tests API connectivity, so all entity type and filter
+      flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping). It does not match any of the
+      specific expected outcomes such as enriching IOCs, containing hosts, updating
+      tickets, or fetching alert information.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

@@ -1,0 +1,551 @@
+Get Violation Details:
+  ai_description: >-
+    ### General Description
+
+    Fetches Group-IB DRP violation details for URL entities. This action retrieves
+    comprehensive violation information associated with specific URLs and attaches
+    the findings as case insights.
+
+
+    ### Flow Description
+
+    1. Extracts `violation_url` and `violation_uid` from the current alert's security
+    events to build a URL-to-UID mapping.
+
+    2. Iterates over the target entities, filtering for those of type `DestinationURL`.
+
+    3. Looks up the corresponding violation UID for each entity's identifier.
+
+    4. Makes an API call (`search_feed_by_id`) to Group-IB DRP to fetch the violation
+    details for the identified UID.
+
+    5. Parses the response to extract scores, status, dates, and other relevant metadata.
+
+    6. Creates a case insight for each successfully processed entity containing the
+    violation details.
+
+    7. Aggregates all fetched data and returns it as a JSON result.
+
+
+    ### Additional Notes
+
+    - The action will only process entities that have a matching `violation_url` in
+    the alert's security events.
+
+    - If an API call fails for any entity, the action will complete with a failed
+    execution state.
+  ai_short_description: >-
+    Fetches Group-IB DRP violation details for URL entities by mapping them to violation
+    UIDs found in alert events, retrieving the data via API, and creating case insights
+    with the results.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: true
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from the Group-IB DRP API using `search_feed_by_id`.
+      It does not mutate any external data. Internally, it creates case insights using
+      `siemplify.create_case_insight` but does not update entities or modify alert
+      data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: true
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: true
+    filters_by_identifier: true
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `if
+      entity.entity_type != "DestinationURL": continue`. It also checks if the `entity.identifier`
+      exists in a pre-built `url_to_uid` map, skipping the entity if no UID is found.
+      Therefore, it targets URL entities and filters them by entity type and identifier.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: true
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches violation details and threat intelligence for URL entities
+      from Group-IB DRP. This matches the 'Enrich IOC' expected outcome as it returns
+      contextual threat data for an indicator.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Verifies connectivity to the Group-IB DRP API. This action is used to ensure that
+    the integration is properly configured and can successfully communicate with the
+    external service.
+
+
+    ### Flow Description
+
+    1. Initializes the action and retrieves the integration-level configuration parameters
+    (API credentials and URL).
+
+    2. Constructs a poller instance to manage the API connection.
+
+    3. Sends a test GET request to the `violation/list` endpoint of the Group-IB DRP
+    API.
+
+    4. Evaluates the response and outputs a success message if the connection is established,
+    or an error message if the request fails.
+
+
+    ### Additional Notes
+
+    This is a utility action primarily used for testing and validating the integration's
+    connection settings. It does not process entities or modify any data.
+  ai_short_description: >-
+    Verifies connectivity to the Group-IB DRP API by sending a test request to the
+    violation list endpoint.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action sends a GET request to test connectivity but does not fetch contextual
+      data for alerts/entities, mutate external data, mutate internal data, update
+      entities, create insights, modify alert data, or create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It solely performs
+      a connectivity check to the API. Therefore, all entity types and filters are
+      set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple ping/connectivity test. It does not enrich data, modify
+      alerts, interact with tickets, or perform any containment/remediation actions.
+      Thus, it does not match any of the expected outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+URL-Approve:
+  ai_description: >-
+    ### General Description
+
+    Approves Digital Risk Protection (DRP) violation URLs in Group-IB by matching
+    the target entities of the action. This action interacts with the Group-IB DRP
+    API to submit an approve request for each matching URL entity.
+
+
+    ### Flow Description
+
+    1. Gathers target entities and their types from the action's scope.
+
+    2. Parses the current alert's security events to build a mapping of violation
+    URLs to violation UIDs.
+
+    3. Iterates over the target entities, filtering specifically for `DestinationURL`
+    entities.
+
+    4. For each valid entity, retrieves its corresponding violation UID from the mapping.
+
+    5. Submits a POST request to the Group-IB DRP API (`violation/change-approve`)
+    to approve the violation.
+
+    6. Aggregates the results (approved, failed, unmapped) and outputs a summary message.
+
+
+    ### Additional Notes
+
+    The action does not abort if a single entity fails; it aggregates failures and
+    exits with a failed state only if at least one entity could not be approved.
+  ai_short_description: >-
+    Approves Digital Risk Protection (DRP) violation URLs in Group-IB for matching
+    URL entities.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Approves a violation URL in the Group-IB DRP system.
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a POST request to the Group-IB DRP API to approve a violation,
+      which mutates external data. It does not fetch contextual data, mutate internal
+      SecOps data, update entities, or create insights.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: true
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: true
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `_entity_type
+      != "DestinationURL"`. This means it specifically targets URL entities and filters
+      them by their entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action approves a violation URL in the Group-IB DRP system. This does not
+      align with standard outcome categories such as enriching IOCs, updating SecOps
+      alerts, or modifying blocklists/allowlists.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+URL-Reject:
+  ai_description: >-
+    ### General Description
+
+    Rejects Digital Risk Protection (DRP) violation URLs in Group-IB DRP. It maps
+    the action's target entities (Destination URLs) to violation UIDs found in the
+    alert's security events, then submits a rejection request to the Group-IB DRP
+    API for each matched URL.
+
+
+    ### Flow Description
+
+    1. Retrieves target entities and the current alert's security events.
+
+    2. Parses security events to build a mapping of violation URLs to their corresponding
+    violation UIDs.
+
+    3. Iterates through the target entities, filtering for `DestinationURL` types.
+
+    4. Matches each URL entity to its violation UID.
+
+    5. Sends a POST request to the Group-IB DRP API (`violation/change-approve`) with
+    `approve: False` to reject the violation.
+
+    6. Aggregates the results and returns a summary message indicating successful,
+    failed, and unmapped rejections.
+
+
+    ### Additional Notes
+
+    The action will not fail entirely if a single entity fails; it aggregates failures
+    and exits with a failed state only if at least one entity could not be rejected.
+  ai_short_description: >-
+    Rejects Digital Risk Protection (DRP) violation URLs in Group-IB DRP by mapping
+    target entities to violation UIDs and submitting rejection requests via the API.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Sends a POST request to the Group-IB DRP API to reject a violation associated
+      with the URL.
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action sends a POST request to the Group-IB DRP API (`violation/change-approve`)
+      to mutate external data (rejecting a violation). It does not fetch enrichment
+      data, update internal entities, create insights, or modify internal case/alert
+      data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: true
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: true
+    filters_by_identifier: true
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and explicitly filters
+      for entities where `_entity_type == "DestinationURL"` (which maps to the URL
+      entity type). It also uses the entity's identifier to look up a violation UID
+      mapped from the alert's security events.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action rejects a violation URL in the external Group-IB DRP platform. This
+      specific operation does not match any of the predefined outcome categories such
+      as blocking an IOC, updating a ticket, or enriching an entity. Therefore, all
+      outcome category flags are set to false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

@@ -2,25 +2,44 @@ Get Country Flag:
   ai_description: >-
     ### General Description
 
-    The **Get Country Flag** action retrieves a base64-encoded image of a country's
-    flag from the `countryflags.io` service. This utility is used to provide visual
-    context for countries associated with entities or provided as direct input. The
-    action maintains a local cache to optimize performance and reduce API calls.\n\n###
-    Parameters Description\n| Parameter | Type | Mandatory | Description |\n| :---
-    | :--- | :--- | :--- |\n| Country Code Two Digit | string | No | A 2-letter ISO
-    country code (e.g., 'us', 'fr') to fetch the flag for. |\n| Country Code From
-    Entity Field | string | No | A comma-separated list of field names to look for
-    in an entity's `additional_properties` (e.g., 'country', 'location'). |\n\n###
-    Additional Notes\n- The action uses a local `flags.json` file in the run folder
-    for caching.\n- If no country code is found and no parameter is provided, the
-    action completes without fetching data.\n\n### Flow Description\n1. **Load Cache**:
-    Attempts to read existing flag data from a local JSON file.\n2. **Identify Country
-    Codes**: Checks the `Country Code Two Digit` parameter and iterates through entities
-    to find codes in specified `additional_properties` fields.\n3. **Fetch Missing
-    Flags**: For any code not in the cache, it performs a GET request to the external
-    flag service.\n4. **Process and Encode**: Converts the image content to a base64
-    string.\n5. **Update and Output**: Updates the local cache file and adds the base64
-    strings to the action's JSON result.
+    Retrieves the national flag of a specified country as a base64-encoded string.
+    It can fetch flags based on a directly provided two-digit country code or by extracting
+    country codes from specific fields within the additional properties of target
+    entities.
+
+
+    ### Flow Description
+
+    1. Initializes the action and attempts to load a local cache file of previously
+    fetched flags.
+
+    2. Reads the provided parameters for direct country codes or entity fields containing
+    country codes.
+
+    3. Iterates through target entities. If an entity has a matching field in its
+    additional properties, it extracts the country code.
+
+    4. Checks the local cache for the flag. If not found, makes an HTTP GET request
+    to `countryflags.io` to download the flag image.
+
+    5. Converts the downloaded image to a base64 string and stores it in the results
+    JSON.
+
+    6. Repeats the fetch and conversion process for any directly provided country
+    code parameter.
+
+    7. Updates the local cache file with any newly fetched flags and returns the base64
+    data in the action's JSON result.
+
+
+    ### Additional Notes
+
+    The action relies on `countryflags.io` for fetching the images. It uses a local
+    caching mechanism within the run folder to reduce redundant API calls.
+  ai_short_description: >-
+    Retrieves a country's flag as a base64-encoded string from countryflags.io, using
+    either a directly provided country code or by extracting country codes from the
+    additional properties of target entities.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -31,45 +50,49 @@ Get Country Flag:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: true
+    reasoning: >-
+      The action makes an HTTP GET request to countryflags.io to fetch image data,
+      so it fetches data. It does not perform any state-changing operations on external
+      systems (no POST/PUT/DELETE). It does not mutate internal SecOps data (like
+      updating entities or adding insights), it only returns a JSON result and updates
+      a local cache file.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - ALERT
-    - APPLICATION
-    - CHILDHASH
-    - CHILDPROCESS
-    - CLUSTER
-    - CONTAINER
-    - CREDITCARD
-    - CVE
-    - CVEID
-    - DATABASE
-    - DEPLOYMENT
-    - DESTINATIONDOMAIN
-    - DOMAIN
-    - EMAILSUBJECT
-    - EVENT
-    - FILEHASH
-    - FILENAME
-    - GENERICENTITY
-    - HOSTNAME
-    - IPSET
-    - MacAddress
-    - PARENTHASH
-    - PARENTPROCESS
-    - PHONENUMBER
-    - POD
-    - PROCESS
-    - SERVICE
-    - SOURCEDOMAIN
-    - THREATACTOR
-    - THREATCAMPAIGN
-    - THREATSIGNATURE
-    - DestinationURL
-    - USB
-    - USERUNIQNAME
+      address: true
+      alert: true
+      application: true
+      child_hash: true
+      child_process: true
+      cluster: true
+      container: true
+      credit_card: true
+      cve: true
+      cve_id: true
+      database: true
+      deployment: true
+      destination_domain: true
+      domain: true
+      email_message: true
+      event: true
+      file_hash: true
+      file_name: true
+      generic: true
+      host_name: true
+      ip_set: true
+      mac_address: true
+      parent_hash: true
+      parent_process: true
+      phone_number: true
+      pod: true
+      process: true
+      service: true
+      source_domain: true
+      threat_actor: true
+      threat_campaign: true
+      threat_signature: true
+      url: true
+      usb: true
+      user: true
     filters_by_additional_properties: true
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -83,46 +106,84 @@ Get Country Flag:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` without filtering by `entity_type`,
+      meaning it can process any entity type passed to it. It explicitly checks if
+      a specified field exists in `entity.additional_properties` to extract the country
+      code, so it filters by additional properties.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches a country flag image from a public API and returns it as
+      a base64 string. It does not match any of the specific expected outcomes for
+      the predefined categories (e.g., it is not threat intel enrichment, asset enrichment,
+      ticketing, containment, etc.). Therefore, all outcome categories are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Country Code Two Digit | String | No | Enter the 2 digits of a given country
+    (for example, us) |
+
+    | Country Code From Entity Field | String | No | Insert a given field related
+    to a specific entity that has been enriched by another product that you would
+    like to a extract a base64 for that country |
 Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is designed to verify connectivity between Google SecOps and
-    the Country Flags service. It performs a test request to ensure that the integration
-    can successfully reach the external API and retrieve data.
-
-
-    ### Parameters Description
-
-    There are no parameters for this action.
-
-
-    ### Additional Notes
-
-    This action uses a hardcoded country code ("us") to perform the connectivity test.
-    It also utilizes a local cache file (`flags.json`) within the execution environment
-    to store previously retrieved flag data. Note that while the action fetches data,
-    it is named 'Ping' and therefore is not categorized as an enrichment action per
-    standard guidelines.
+    Tests connectivity to the Country Flags service by attempting to retrieve the
+    flag for a hardcoded country code ("us").
 
 
     ### Flow Description
 
-    1. **Initialize**: The script initializes the Siemplify action and attempts to
-    load existing flag data from a local cache file named `flags.json` in the run
-    folder.
+    1. Attempts to load a local cache file (`flags.json`) containing previously fetched
+    flags.
 
-    2. **Cache Check**: It checks if the flag for the hardcoded country code "us"
-    is already present in the loaded cache.
+    2. Checks if the flag for the United States ("us") is present in the cache.
 
-    3. **API Request**: If the flag is not found in the cache, it sends a GET request
-    to the Country Flags API (`https://www.countryflags.io/us/flat/64.png`).
+    3. If not found, makes an HTTP GET request to the Country Flags API (`https://www.countryflags.io/us/flat/64.png`)
+    to fetch the flag image.
 
-    4. **Data Processing**: The retrieved image content is encoded into a base64 string
-    and added to the local cache object.
+    4. Returns a successful execution state if the flag is successfully retrieved
+    or found in the cache.
 
-    5. **Completion**: The action concludes with a success status if the flag data
-    is successfully obtained (either from the cache or the external API).
+
+    ### Additional Notes
+
+    This action is primarily used as a Ping/connectivity test for the integration.
+    It does not process any SOAR entities or require input parameters.
+  ai_short_description: >-
+    Tests connectivity to the Country Flags service by attempting to fetch a sample
+    flag image.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -133,10 +194,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes an HTTP GET request to fetch a flag image to test connectivity.
+      It does not mutate any external systems, nor does it update entities, create
+      insights, modify alerts, or create case comments within Google SecOps.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -150,3 +248,41 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The script does not reference `siemplify.target_entities` or perform any entity-based
+      operations. It uses a hardcoded country code ('us') to test connectivity. Therefore,
+      all entity types and filter flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple Ping/connectivity test that fetches a sample flag image.
+      It does not enrich IOCs/assets, update alerts, manage tickets, modify blocklists/allowlists,
+      manage identities, contain hosts, search/download files, or send emails/messages.
+      Thus, it does not match any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

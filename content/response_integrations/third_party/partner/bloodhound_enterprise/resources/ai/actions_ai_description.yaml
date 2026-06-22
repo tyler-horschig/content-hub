@@ -1,0 +1,555 @@
+Does Path Exists:
+  ai_description: >-
+    ### General Description
+
+    Checks if an attack path exists between multiple combinations of principals (source
+    and destination nodes) in BloodHound Enterprise.
+
+
+    ### Flow Description
+
+    1. Extracts the `Event Details` parameter containing JSON pairs of `FromPrincipal`
+    and `ToPrincipal`.
+
+    2. Parses the input to identify all principal pairs.
+
+    3. Iterates through each pair and makes a GET request to the BloodHound Enterprise
+    API (`/api/v2/graphs/shortest-path`) to determine if a path exists between the
+    start and end nodes.
+
+    4. Aggregates the results and outputs a JSON object containing the path information
+    for each pair.
+
+    5. Returns `true` if all checked paths exist, otherwise `false`.
+
+
+    ### Additional Notes
+
+    This action relies on the `Event Details` parameter to specify the target nodes
+    rather than standard SOAR entities.
+  ai_short_description: >-
+    Checks if an attack path exists between specified source and destination principals
+    in BloodHound Enterprise.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data by making a GET request to the BloodHound Enterprise
+      API to check for the existence of an attack path. It does not mutate any external
+      data, nor does it mutate internal data, update entities, create insights, modify
+      alert data, or create case comments. It only returns a JSON result to the playbook.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The script does not iterate over or interact with `siemplify.target_entities`.
+      Instead, it extracts the target principals directly from the 'Event Details'
+      action parameter. Therefore, it does not run on entities and all entity-related
+      flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action queries BloodHound Enterprise to check if an attack path exists between
+      two nodes. It does not enrich an IOC or Asset with standard contextual metadata,
+      nor does it update alerts, tickets, or blocklists. It does not match any of
+      the predefined expected outcomes.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Event Details | String | Yes | A JSON string or comma-separated JSON objects
+    containing `FromPrincipal` and `ToPrincipal` keys representing the source and
+    destination nodes to check for an attack path. |
+Fetch Assets:
+  ai_description: >-
+    ### General Description
+
+    Fetches detailed asset information from BloodHound Enterprise based on provided
+    object IDs. This action retrieves primary asset details and, for Azure objects,
+    enriches the response with related entity counts.
+
+
+    ### Flow Description
+
+    1. Extracts the `Object IDs` parameter and splits it into a list of individual
+    IDs.
+
+    2. Manages asynchronous execution by processing one object ID per run to prevent
+    timeouts.
+
+    3. Makes a GET request to the BloodHound Enterprise API to search for the object
+    and determine its type.
+
+    4. Makes subsequent GET requests to fetch primary asset details based on the object
+    type (Directory, Azure, or Base).
+
+    5. If the object is an Azure type, makes additional GET requests to fetch related
+    entity counts.
+
+    6. Aggregates the fetched asset information and adds it to the action's JSON result.
+
+
+    ### Additional Notes
+
+    This action supports asynchronous execution and will return an INPROGRESS state
+    until all provided object IDs have been processed.
+  ai_short_description: >-
+    Fetches detailed asset information from BloodHound Enterprise using specified
+    object IDs.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes GET requests to the BloodHound Enterprise API to fetch asset
+      information based on object IDs, so it fetches data. It does not perform any
+      state-changing operations on external systems. It also does not update internal
+      SecOps entities, create insights, modify alerts, or add case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It relies entirely on the manually provided `Object IDs` parameter.
+      Therefore, it does not run on entities and all entity-related flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches asset information from BloodHound Enterprise based on specific
+      object IDs provided as a parameter. It does not operate on SecOps entities to
+      enrich them, nor does it mutate external state, update alerts, or perform containment.
+      Therefore, it does not match any of the specific outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Object IDs | String | Yes | Comma-separated list of BloodHound object IDs (SIDs
+    or Azure object IDs) to fetch. |
+Get Object Id:
+  ai_description: >-
+    ### General Description
+
+    Fetches object IDs from BloodHound Enterprise based on provided object names.
+    This action queries the BloodHound Enterprise API to retrieve the unique identifiers
+    for a given list of object names, which can be used in subsequent actions.
+
+
+    ### Flow Description
+
+    1. Extracts the comma-separated list of object names from the action parameters.
+
+    2. Initializes the connection to the BloodHound Enterprise API using the provided
+    integration credentials.
+
+    3. Iterates through each provided object name and makes a GET request to the `/api/v2/search`
+    endpoint to fetch the corresponding object ID.
+
+    4. Consolidates the retrieved object IDs and returns them as a JSON result.
+
+
+    ### Additional Notes
+
+    Ensure that the provided object names exactly match the names in BloodHound Enterprise
+    to successfully retrieve their IDs.
+  ai_short_description: >-
+    Fetches object IDs from BloodHound Enterprise based on provided object names.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data (object IDs) from BloodHound Enterprise via a GET request
+      to the search endpoint. It does not mutate external data, mutate internal data,
+      update entities, create insights, modify alert data, or create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process `siemplify.target_entities`. It
+      relies entirely on the 'Object Names' parameter provided by the user. Therefore,
+      all entity-related flags are set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action searches for object IDs in BloodHound Enterprise based on provided
+      names. It does not enrich specific IOCs or assets within the SecOps platform,
+      nor does it mutate external state, update alerts, or perform any of the other
+      specific outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Object Names | String | Yes | Comma-separated list of BloodHound object names
+    to look up object IDs for. |
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Tests the connection to the BloodHound Enterprise server to verify credentials
+    and network connectivity.
+
+
+    ### Flow Description
+
+    1. Extracts the integration-level configuration parameters (BloodHound Enterprise
+    Server, Token ID, and Token Key).
+
+    2. Initializes the BloodHound Enterprise manager with the provided credentials.
+
+    3. Makes a GET request to the `/api/v2/available-domains` endpoint to verify connectivity
+    and authentication.
+
+    4. Returns a successful execution state if the connection succeeds, or fails if
+    an error occurs.
+
+
+    ### Additional Notes
+
+    This is a utility action primarily used during integration setup or troubleshooting
+    to ensure that the SOAR platform can successfully communicate with the BloodHound
+    Enterprise API.
+  ai_short_description: >-
+    Tests the connection to the BloodHound Enterprise server to verify credentials
+    and network connectivity.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a simple GET request to test API connectivity. It does not
+      fetch contextual data for entities, mutate external systems, update internal
+      entities, or create insights/comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It is a standalone
+      connectivity test that does not rely on case or alert data.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      This is a utility action designed solely to test connectivity to the BloodHound
+      Enterprise API. It does not perform any security operations, enrich data, mutate
+      state, or interact with alerts/cases, and therefore does not match any of the
+      specific outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

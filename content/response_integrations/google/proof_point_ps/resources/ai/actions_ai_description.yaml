@@ -1,87 +1,98 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Enrich Entities:
   ai_description: >-
     ### General Description
 
-    The **Enrich Entities** action retrieves quarantine message information from **ProofPoint
-    Email Protection (PS)** for specific entities. It identifies email traffic associated
-    with Hostnames (via domain) and Users (via email address) to provide context on
-    potential mail-related security events.
-
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | None | N/A | N/A | This action does not take any input parameters; it uses the
-    global integration configuration. |
-
-
-    ### Additional Notes
-
-    * **User Validation**: User entities are only processed if their identifier matches
-    a standard email regex pattern.
-
-    * **Data Cleaning**: The action automatically strips `dlpviolation` and `messagestatus`
-    fields from the ProofPoint records before enrichment to maintain data relevance.
+    Enriches Hostname and User entities using ProofPoint Email Protection. The action
+    queries the ProofPoint Protection Server for quarantine messages associated with
+    the entities and appends the retrieved message details to the entities' additional
+    properties.
 
 
     ### Flow Description
 
-    1. **Connection**: Establishes a session with the ProofPoint PS API using the
-    configured API Root and credentials.
+    1. Iterates through the target entities in the case.
 
-    2. **Entity Processing**: Iterates through target entities in the current context.
+    2. Checks if the entity is a Hostname or a User with a valid email address format.
 
-    3. **Search Logic**:
-        * **Hostnames**: Extracts the domain from the hostname and searches for quarantine
-    records where the sender or recipient domain matches.
-        * **Users**: Validates the email format and searches for quarantine records
-    where the user is the sender or recipient.
-    4. **Data Transformation**: Flattens the resulting JSON records and applies a
-    `ProofPointPS` prefix.
+    3. For Hostnames, extracts the domain and searches ProofPoint via the `/rest/v1/quarantine`
+    endpoint for quarantine messages where the domain is the sender or recipient.
 
-    5. **Internal Update**: Updates the `additional_properties` of the entities in
-    Google SecOps and saves the changes.
+    4. For Users, searches ProofPoint for quarantine messages where the email address
+    is the sender or recipient.
+
+    5. Filters out specific fields (`dlpviolation`, `messagestatus`) from the retrieved
+    records.
+
+    6. Flattens the remaining record data and updates the entity's additional properties.
+
+    7. Updates the enriched entities within the Google SecOps platform.
+
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Enriches Hostname and User entities by querying ProofPoint Email Protection for
+    associated quarantine messages and appending the results to the entities' additional
+    properties.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: true
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Updates the 'additional_properties' attribute of Hostname and User entities
-      with flattened quarantine data retrieved from ProofPoint.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data by making a GET request to the ProofPoint API (`/rest/v1/quarantine`).
+      It does not mutate external data. It updates internal entities by calling `siemplify.update_entities`
+      to save the new additional properties. It does not create insights, modify alert
+      data, or create case comments.
   entity_usage:
     entity_types:
-    - HOSTNAME
-    - USERUNIQNAME
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: true
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
     filters_by_creation_time: false
     filters_by_entity_type: true
-    filters_by_identifier: false
+    filters_by_identifier: true
     filters_by_is_artifact: false
     filters_by_is_enriched: false
     filters_by_is_internal: false
@@ -89,45 +100,75 @@ Enrich Entities:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and filters them based
+      on `entity.entity_type`. It specifically targets `EntityTypes.HOSTNAME` and
+      `EntityTypes.USER`. For `USER` entities, it further filters by checking if the
+      `entity.identifier` is a valid email address using the `is_valid_email` function.
+      Therefore, it uses Hostname and User entity types, and filters by entity type
+      and identifier.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches contextual metadata (quarantine message records) for Hostname
+      and User entities from ProofPoint and updates the entities' additional properties.
+      This aligns with the 'Enrich Asset' category. It does not perform any state-changing
+      operations on external systems or return a standalone list of emails.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Ping:
   ai_description: >-
     ### General Description
 
-    Tests the connectivity to the ProofPoint Protection Server by attempting to authenticate
-    and perform a basic search query against the quarantine API. This ensures that
-    the integration configuration (API Root, Username, Password) is correct and the
-    server is reachable.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | N/A | N/A | N/A | This action does not have any input parameters. |
+    Tests connectivity to the ProofPoint Protection Server to ensure the integration
+    is configured correctly.
 
 
     ### Flow Description
 
-    1. **Configuration Retrieval**: The action retrieves the integration's configuration,
-    including the API Root, credentials, and SSL verification settings.
+    1. Retrieves integration configuration parameters (API Root, Username, Password,
+    Verify SSL).
 
-    2. **Manager Initialization**: A `ProofPointPSManager` instance is created using
-    the retrieved configuration.
+    2. Initializes the ProofPointPSManager.
 
-    3. **Connectivity Test**: The action calls the `test_connectivity` method, which
-    executes a GET request to the `/rest/v1/quarantine` endpoint with a wildcard sender
-    filter (`*`).
+    3. Executes a test search query (`sender="*"`) via a GET request to the `/rest/v1/quarantine`
+    endpoint to verify API access.
 
-    4. **Result Handling**: If the request is successful, the action returns a success
-    message indicating that the connection is established.
+    4. Returns a success message if the connection is established.
 
 
     ### Additional Notes
 
-    This is a standard connectivity test and does not interact with or modify any
-    entities in the environment.
+    This is a utility action used to verify that the integration is configured correctly
+    and can communicate with the ProofPoint Protection Server API.
+  ai_short_description: >-
+    Tests connectivity to the ProofPoint Protection Server by executing a test search
+    query.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -136,12 +177,49 @@ Ping:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action performs a simple GET request to test connectivity. It does not fetch
+      contextual data for entities, mutate external data, mutate internal data, update
+      entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -155,3 +233,39 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It is a standalone
+      connectivity test.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enriching IOCs, updating alerts, or modifying
+      external systems.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

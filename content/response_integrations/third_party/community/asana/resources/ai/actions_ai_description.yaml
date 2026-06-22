@@ -2,41 +2,32 @@ Add User To Workspace:
   ai_description: >-
     ### General Description
 
-    This action adds a user to a specific Asana workspace using their email address.
-    It is used to manage workspace membership programmatically within the Asana platform.
-
-
-    ### Parameters Description
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Workspace Name | string | Yes | The name of the Asana workspace to which you
-    want to add the user. Note: This field is case-sensitive. |
-
-    | User's Email | string | Yes | The email address of the user you want to add
-    to the workspace. |
+    Adds a user to a specific workspace in Asana. This action retrieves the workspace
+    ID based on the provided workspace name and then initiates a request to add the
+    specified user's email to that workspace, effectively granting them access.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction**: The action retrieves the Asana API token and
-    base URL from the integration configuration.
+    1. Extracts the `Workspace Name` and `User's Email` from the action parameters.
 
-    2. **Parameter Extraction**: The action extracts the target workspace name and
-    the user's email from the action parameters.
+    2. Makes a GET request to the Asana API to retrieve the workspace ID associated
+    with the provided workspace name.
 
-    3. **Workspace Identification**: It calls the Asana API to list all workspaces
-    and finds the unique identifier (GID) for the workspace matching the provided
-    name.
+    3. Makes a POST request to the Asana API to add the user to the specified workspace.
 
-    4. **User Addition**: It sends a POST request to the Asana API endpoint `/workspaces/{workspace_id}/addUser`
-    with the user's email.
+    4. Returns the added user details as a JSON result and outputs a success or failure
+    message to the case wall.
 
-    5. **Result Processing**: The action captures the API response, adds it as a JSON
-    result to the SOAR case, and provides a success or failure message based on the
-    outcome.
+
+    ### Additional Notes
+
+    - The `Workspace Name` parameter is case-sensitive.
+
+    - Ensure the provided email address corresponds to a valid user or a user you
+    intend to invite to the workspace.
+  ai_short_description: >-
+    Adds a specified user to a designated workspace in Asana.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -45,14 +36,51 @@ Add User To Workspace:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      This action adds a user to an Asana workspace, which changes the membership
-      state of that workspace in the external Asana system.
-    fetches_data: true
+      Adds a user to a specific workspace in Asana via a POST request.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the Asana API to add a user to a workspace,
+      which mutates external data. It does not fetch contextual data for enrichment,
+      nor does it mutate internal SecOps data, update entities, create insights, or
+      add case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -66,64 +94,85 @@ Add User To Workspace:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It relies entirely on the explicitly provided action parameters
+      (Workspace Name and User's Email). Therefore, all entity type and filter flags
+      are set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action adds a user to a workspace in Asana, which modifies their group memberships
+      and permissions within the external application. This aligns with the 'Update
+      Identity' expected outcome. It does not enrich IOCs, update alerts, or perform
+      containment.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: true
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Workspace Name | String | Yes | The workspace to which you want to add the user.
+    Note: It is case sensitive! |
+
+    | User's Email | String | Yes | The email address of the user you want to add
+    |
 Create Task:
   ai_description: >-
     ### General Description
 
-    Creates a new task within a specific project in Asana. This action allows users
-    to automate task management and tracking directly from Google SecOps by generating
-    tasks with specific subjects, descriptions, assignees, and due dates.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Task Subject | String | Yes | The title or subject line of the new task to be
-    created. |
-
-    | Assignee | String | No | The user to whom the task will be assigned. Note: This
-    is case-sensitive and typically expects the user's email or unique identifier.
-    |
-
-    | Due Date | String | No | The deadline for the task, which must be provided in
-    the format YYYY-MM-DD. |
-
-    | Description | String | Yes | The detailed content or notes for the new task.
-    |
-
-    | Project Name | String | Yes | The name of the Asana project where the task will
-    be assigned. Note: This is case-sensitive. |
-
-
-    ### Additional Notes
-
-    - Either the project name must exist exactly as provided (case-sensitive) for
-    the action to successfully retrieve the project ID.
-
-    - If the Assignee parameter is provided, the action will attempt to resolve the
-    user's email to a unique Asana GID.
+    Creates a new task in a specific Asana project.
 
 
     ### Flow Description
 
-    1. **Configuration Retrieval**: The action extracts the Asana API Token and Base
-    URL from the integration configuration.
+    1. Extracts the provided action parameters: Task Subject, Assignee, Due Date,
+    Description, and Project Name.
 
-    2. **Project ID Resolution**: It queries the Asana API to find the unique project
-    ID corresponding to the provided `Project Name`.
+    2. Makes a GET request to the Asana API to retrieve the project ID associated
+    with the provided Project Name.
 
-    3. **User ID Resolution (Optional)**: If an `Assignee` is specified, the action
-    fetches the unique user ID for that individual.
+    3. If an Assignee is specified, makes a GET request to the Asana API to retrieve
+    the corresponding user ID.
 
-    4. **Task Creation**: The action sends a POST request to the Asana `/tasks` endpoint,
-    including the subject, description, project ID, and optional assignee/due date.
+    4. Makes a POST request to the Asana API to create the new task with the specified
+    details.
 
-    5. **Output Generation**: Upon successful creation, the action adds a direct link
-    to the new task in the SOAR interface and provides the full JSON response for
-    downstream use.
+    5. Attaches a link to the newly created task and the raw JSON response to the
+    action results.
+
+
+    ### Additional Notes
+
+    The `Project Name` and `Assignee` parameters are case-sensitive and must exactly
+    match the values in Asana.
+  ai_short_description: >-
+    Creates a new task in a specific Asana project.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -132,13 +181,50 @@ Create Task:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Creates a new task record in the specified Asana project via a POST request.
-    fetches_data: true
+      Creates a new task in a specific Asana project.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the Asana API to create a new task, which
+      mutates external data. It does not fetch contextual data for entities or alerts,
+      nor does it mutate internal SecOps data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -152,50 +238,88 @@ Create Task:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It operates entirely on the provided action parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: true
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action creates a new task in Asana, which is an external project/task management
+      system. This aligns with the 'Create Ticket' expected outcome of generating
+      a new record in an external system.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Task Subject | string | Yes | The new task subject |
+
+    | Assignee | string | No | The user to whom you will assign the task. Note: This
+    is case sensitive! |
+
+    | Due Date | string | No | The due date is in the format YYYY-MM-DD |
+
+    | Description | string | Yes | The description of the new task |
+
+    | Project Name | string | Yes | The name of the project to which you want to assign
+    the task. Note: this is case sensitive |
 Get Task:
   ai_description: >-
     ### General Description
 
-    The **Get Task** action retrieves comprehensive details for a specific task in
-    Asana using its unique Task ID. This action allows analysts to pull context about
-    work items directly into Google SecOps for investigation or tracking purposes.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Task ID** | String | Yes | The unique identifier for the Asana task, typically
-    found in the task's URL (e.g., `https://app.asana.com/0/project_id/task_id`).
-    |
-
-
-    ### Additional Notes
-
-    - This action does not process or filter SecOps entities; it is a standalone data
-    retrieval task based on the provided ID.
-
-    - The action provides a direct link to the Asana task in the SecOps interface
-    for quick access.
+    Retrieves the details of a specific task from Asana using its Task ID.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction**: Retrieves the API Token and Base URL from the
-    Asana integration configuration.
+    1. Extracts the `Task ID` parameter provided by the user.
 
-    2. **Parameter Retrieval**: Extracts the `Task ID` from the action parameters.
+    2. Initializes the AsanaManager with the integration's authentication token and
+    base URL.
 
-    3. **API Interaction**: Initializes the Asana Manager and performs a GET request
-    to the `/tasks/{task_id}` endpoint.
+    3. Makes a GET request to the Asana API to fetch the details of the specified
+    task.
 
-    4. **Result Processing**: If the task is found, it extracts the task name, due
-    date, and permalink.
+    4. If the task is found, adds a link to the task in the SecOps platform and attaches
+    the task details as a JSON result.
 
-    5. **Output**: Adds a link to the task and the full JSON response to the action
-    results, then terminates with a success message.
+    5. Returns a success or failure message based on whether the task was found.
+
+
+    ### Additional Notes
+
+    Although the success output message in the script states that the task was "updated
+    successfully", the action functionally only retrieves the task details and does
+    not perform any updates.
+  ai_short_description: >-
+    Retrieves the details of a specific task from Asana using its Task ID and attaches
+    the information as a JSON result.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -206,10 +330,47 @@ Get Task:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: true
+    reasoning: >-
+      The action fetches task data from Asana via a GET request. It does not mutate
+      external data, update entities, create insights, modify alert data, or create
+      case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -223,63 +384,89 @@ Get Task:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on any entities. It relies solely on the provided
+      Task ID parameter to fetch data.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches task details from Asana. This does not match any of the predefined
+      outcome categories such as enriching IOCs/assets, updating alerts, or managing
+      tickets (it reads a task, but doesn't create or update it).
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Task ID | string | Yes | The task ID can be found in the URL: https://app.asana.com/0/{your_project_ID}/{your_task_ID}
+    |
 List My Tasks:
   ai_description: >-
     ### General Description
 
-    The **List My Tasks** action retrieves a list of tasks associated with a specific
-    user within a designated Asana workspace. It allows analysts to view task details,
-    including names, due dates, and direct links to the tasks in Asana. This action
-    is useful for tracking user activity or verifying task statuses during an investigation.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **User's Email** | String | Yes | The email address of the Asana user whose
-    tasks you want to retrieve. |
-
-    | **Workspace Name** | String | Yes | The exact name of the Asana workspace. Note:
-    This is case-sensitive. |
-
-    | **Completed Status** | Boolean | No | If checked (True), the action retrieves
-    only tasks that have been marked as completed. If unchecked (False), it retrieves
-    only incomplete tasks. |
+    Retrieves a list of tasks associated with a specific user in Asana. This action
+    queries the Asana API to find tasks assigned to a user within a specified workspace
+    and can optionally filter the results to show only completed tasks.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action initializes the Asana manager using the configured
-    Personal Access Token and Base URL.
+    1. Extracts the provided user email, workspace name, and completion status filter
+    from the action parameters.
 
-    2. **User Identification**: It retrieves the unique Asana User ID (GID) associated
-    with the provided email address.
+    2. Makes a GET request to the Asana API to resolve the user's email into an Asana
+    user ID.
 
-    3. **Workspace Identification**: It retrieves the unique Workspace ID (GID) by
-    matching the provided workspace name.
+    3. Makes a GET request to the Asana API to resolve the workspace name into a workspace
+    ID.
 
-    4. **Task List Retrieval**: It fetches the specific 'User Task List' ID for the
-    identified user within the specified workspace.
+    4. Makes a GET request to fetch the user's specific task list ID using the resolved
+    user and workspace IDs.
 
-    5. **Task Enumeration**: It retrieves the list of tasks contained within that
-    user's task list.
+    5. Makes a GET request to retrieve all tasks from the identified user task list.
 
-    6. **Detail Fetching & Filtering**: For each task in the list, the action fetches
-    full task details and filters them based on the **Completed Status** parameter.
+    6. Iterates through the retrieved tasks, making a GET request for each task to
+    fetch its full details.
 
-    7. **Output**: Filtered tasks are added to the JSON result, and direct URLs to
-    the tasks are added as links in the action output.
+    7. Filters the detailed tasks based on the requested `Completed Status`.
+
+    8. Returns the filtered tasks as a JSON result and attaches direct URLs to the
+    tasks as links in the SecOps platform.
 
 
     ### Additional Notes
 
-    - This action does not iterate over entities in the case; it relies entirely on
-    the provided input parameters.
-
-    - The `Workspace Name` must be an exact match to the name in Asana.
+    This action does not operate on SecOps entities. It relies entirely on the provided
+    action parameters to query Asana. The workspace name parameter is case-sensitive.
+  ai_short_description: >-
+    Retrieves a list of tasks associated with a specific user within a designated
+    Asana workspace, optionally filtering by completion status.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -290,10 +477,49 @@ List My Tasks:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data from Asana using GET requests to retrieve user IDs,
+      workspace IDs, and task details. It does not perform any state-changing operations
+      (POST/PUT/DELETE) on Asana, so it does not mutate external data. It also does
+      not update entities, create insights, modify alert data, or create case comments
+      within Google SecOps.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -307,63 +533,92 @@ List My Tasks:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It relies entirely on the explicitly provided action parameters
+      (User's Email and Workspace Name) to fetch data. Therefore, all entity type
+      and filter flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a list of tasks from Asana. It does not enrich IOCs or
+      assets, update alerts, create/update tickets in an ITSM (it only lists tasks,
+      does not create them), or perform any containment, identity management, or email
+      operations. Therefore, it does not match any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | User's Email | String | Yes | The email of the user you would like to retrieve
+    tasks for in Asana |
+
+    | Workspace Name | String | Yes | The workspace name.\nNote: This is case sensitive
+    |
+
+    | Completed Status | Boolean | No | Marking the checkbox will retrieve only the
+    tasks that were completed by the user. |
 List Project Tasks:
   ai_description: >-
     ### General Description
 
-    The **List Project Tasks** action retrieves all tasks associated with a specific
-    project in Asana. It is designed to provide visibility into project progress by
-    fetching task details and filtering them based on their completion status. The
-    action outputs a detailed JSON result for each task and provides direct links
-    to the tasks in the Asana web interface for quick access.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Project Name** | String | Yes | The name of the Asana project from which you
-    want to fetch tasks. The action resolves this name to a project ID internally.
-    |
-
-    | **Completed Status** | Boolean | No | Determines which tasks to retrieve. If
-    set to `true`, only completed tasks are returned. If set to `false` (default),
-    only incomplete tasks are returned. |
+    Retrieves a list of tasks associated with a specific project in Asana. This action
+    allows users to fetch task details and optionally filter them based on their completion
+    status.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action extracts the Asana API token and base URL from
-    the integration configuration and the project name and completion status from
-    the action parameters.
+    1. Extracts the `Project Name` and `Completed Status` parameters.
 
-    2. **Project Identification**: It calls the Asana API to find the unique project
-    ID associated with the provided **Project Name**.
+    2. Queries the Asana API to resolve the provided project name to its corresponding
+    project ID.
 
-    3. **Task Listing**: It retrieves a list of all task identifiers associated with
-    that project ID.
+    3. Fetches a list of all tasks associated with the retrieved project ID.
 
-    4. **Detail Retrieval & Filtering**: For each task identifier, the action fetches
-    full task details (including completion status, name, due date, and permalink).
-    It then filters these tasks to match the user-specified **Completed Status**.
+    4. Iterates through the retrieved tasks and makes additional API calls to fetch
+    detailed information for each task.
 
-    5. **Result Compilation**: Matching tasks are added to the final JSON result.
-    For each matching task, a direct link containing the task name and due date is
-    added to the SOAR interface.
+    5. Filters the tasks based on whether their completed status matches the provided
+    `Completed Status` parameter.
 
-    6. **Completion**: The action ends by providing a summary message and the collected
-    task data.
+    6. Compiles the matching tasks into a JSON object and attaches direct links to
+    the tasks in the action results.
 
 
     ### Additional Notes
 
-    - This action does not process SOAR entities (such as IP addresses or Hostnames);
-    it operates strictly based on the provided project name string.
-
-    - If the specified project name cannot be found or contains no tasks matching
-    the filter, the action will return a failure status.
+    This action performs multiple API calls per task to retrieve detailed information,
+    which may impact execution time for projects with a large number of tasks.
+  ai_short_description: >-
+    Retrieves a list of tasks associated with a specific project in Asana, optionally
+    filtering by their completion status.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -374,10 +629,49 @@ List Project Tasks:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data from Asana by making GET requests to retrieve project
+      IDs and task details (fetches_data=true). It does not perform any state-changing
+      operations on external systems (can_mutate_external_data=false). It does not
+      mutate internal SecOps data, update entities, create insights, modify alert
+      data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -391,49 +685,84 @@ List Project Tasks:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over `siemplify.target_entities`. It
+      operates solely on the provided project name parameter to fetch tasks from Asana.
+      Therefore, it does not use any entities, and all entity-related flags are set
+      to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a list of tasks from an Asana project. It does not enrich
+      IOCs or assets, update alerts, manage tickets in an ITSM, modify blocklists/allowlists,
+      manage identities, contain hosts, search events/emails, or perform any other
+      operations that match the predefined outcome categories. Therefore, all outcome
+      category flags are set to false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Project Name | String | Yes | The name of the project from which you would like
+    to fetch all the tasks |
+
+    | Completed Status | Boolean | No | Marking the checkbox will retrieve only the
+    tasks that were completed by the user. |
 Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a utility designed to verify the connectivity between Google
-    SecOps and the Asana service. It ensures that the integration is correctly configured
-    with a valid Personal Access Token (PAT) and that the specified Base URL is reachable.
-    This action is typically used during the initial setup or for troubleshooting
-    communication issues.
-
-
-    ### Parameters Description
-
-    There are no action-specific parameters for this action. It utilizes the global
-    integration configuration parameters:
-
-    * **Token**: The Personal Access Token used for authentication.
-
-    * **Base URL**: The API endpoint URL for Asana.
-
-
-    ### Additional Notes
-
-    As per standard SOAR practices, Ping actions are used solely for health checks
-    and do not process entities or modify data within the case or the external system.
+    Tests connectivity to the Asana API to ensure the integration is configured correctly
+    and can successfully authenticate.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction**: The action retrieves the 'Token' and 'Base URL'
-    from the Asana integration settings.
+    1. Extracts the integration-level configuration parameters (Token and Base URL).
 
-    2. **Manager Initialization**: An instance of the `AsanaManager` is created using
-    the retrieved credentials.
+    2. Initializes the AsanaManager with the provided credentials.
 
-    3. **Connectivity Test**: The action calls the `test_connectivity` method, which
-    performs a GET request to the Asana `/users/me` endpoint.
+    3. Makes a GET request to the `/users/me` endpoint of the Asana API to verify
+    authentication and connectivity.
 
-    4. **Response Validation**: The code checks if the API call was successful and
-    returned a valid JSON response.
+    4. Returns a success message if the connection is established, or a failure message
+    otherwise.
 
-    5. **Result Reporting**: If the connection is successful, it returns a positive
-    status and a success message; otherwise, it reports a failure.
+
+    ### Additional Notes
+
+    This action is typically used as a diagnostic tool to verify that the integration
+    is set up properly. It does not require any action-specific parameters and does
+    not operate on entities.
+  ai_short_description: >-
+    Tests connectivity to the Asana API by making a request to the user profile endpoint
+    to verify authentication.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -442,12 +771,50 @@ Ping:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to the Asana API to test connectivity. It does
+      not fetch contextual data for alerts or entities, nor does it mutate any external
+      or internal data. It does not interact with entities, insights, alerts, or case
+      comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -461,50 +828,72 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It operates independently
+      of case or alert entities, so all entity-related flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (ping) to the Asana API. It does not
+      match any of the specific expected outcomes such as enriching IOCs, managing
+      tickets, modifying alerts, or interacting with endpoints. Therefore, all outcome
+      category flags are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Remove User From Workspace:
   ai_description: >-
     ### General Description
 
-    Removes a specific user from an Asana workspace using their email address. This
-    action is useful for offboarding users or managing workspace access programmatically
-    through Google SecOps.
-
-
-    ### Parameters Description
-
-    | Parameter | Description | Type | Mandatory |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Workspace Name | The name of the Asana workspace from which the user should
-    be removed. Note: This value is case-sensitive. | String | Yes |
-
-    | User's Email | The email address of the user to be removed from the workspace.
-    | String | Yes |
+    Removes a specified user from a designated workspace in Asana. This action modifies
+    the user's access by revoking their membership to the given workspace.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction**: Retrieves the Asana API Token and Base URL from
-    the integration settings.
+    1. Extracts the target workspace name and the user's email address from the action
+    parameters.
 
-    2. **Parameter Retrieval**: Extracts the target Workspace Name and the User's
-    Email from the action inputs.
+    2. Makes a GET request to the Asana API to retrieve the workspace ID that matches
+    the provided workspace name.
 
-    3. **Workspace Identification**: Calls the Asana API to list workspaces and identifies
-    the unique Workspace ID corresponding to the provided name.
+    3. Makes a POST request to the Asana API (`/workspaces/{workspace_id}/removeUser`)
+    to remove the user from the identified workspace.
 
-    4. **User Removal**: Sends a POST request to the Asana `/removeUser` endpoint
-    for the identified workspace, passing the user's email in the request body.
-
-    5. **Result Handling**: Validates the API response. If the user is successfully
-    removed, it returns a success message; otherwise, it reports a failure.
+    4. Evaluates the API response and returns a success or failure message to the
+    SecOps platform.
 
 
     ### Additional Notes
 
-    This action does not run on entities; it relies entirely on the provided string
-    parameters for the workspace name and user email.
+    - The `Workspace Name` parameter is case-sensitive and must exactly match the
+    name in Asana.
+  ai_short_description: >-
+    Removes a specified user from a designated workspace in Asana.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -513,14 +902,51 @@ Remove User From Workspace:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Removes a user's access and membership from a specific Asana workspace by sending
-      a POST request to the Asana API.
-    fetches_data: true
+      Removes a user from a specified workspace in Asana.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action performs a POST request to the Asana API to remove a user from a
+      workspace, which mutates external data (`can_mutate_external_data` = true).
+      It does not fetch contextual data for enrichment, nor does it mutate internal
+      SecOps data, update entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -534,61 +960,83 @@ Remove User From Workspace:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on `siemplify.target_entities` or any entity-specific
+      identifiers. It relies entirely on the explicitly provided action parameters
+      (Workspace Name and User's Email). Therefore, it does not use or filter any
+      entities.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action removes a user from a workspace in Asana. This modifies the user's
+      access permissions and group memberships within the application, which aligns
+      with the 'Update Identity' expected outcome. It does not match other categories
+      such as disabling the identity entirely or enriching data.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: true
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Workspace Name | String | Yes | The workspace from which you want to remove
+    the user. Note: It is case sensitive! |
+
+    | User's Email | String | Yes | The email address of the user you want to remove.
+    |
 Update Task:
   ai_description: >-
     ### General Description
 
-    Updates an existing task in Asana by modifying its assignee, due date, or description.
-    This action is useful for programmatically managing task lifecycles and ensuring
-    task metadata is kept up-to-date based on security orchestration workflows.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Task ID** | String | Yes | The unique identifier of the Asana task to be updated.
-    This can be found in the task's URL. |
-
-    | **Due Date** | String | No | The new due date for the task in `YYYY-MM-DD` format.
-    |
-
-    | **Description** | String | No | The new description or notes for the task. |
-
-    | **Assignee** | String | No | The email address of the user to whom the task
-    should be reassigned. Note that this is case-sensitive and will be resolved to
-    a user ID internally. |
-
-
-    ### Additional Notes
-
-    - The **Assignee** parameter requires a valid email address that exists within
-    the Asana workspace. The action will attempt to resolve this email to a GID (Global
-    ID) before updating the task.
-
-    - If optional parameters like **Due Date**, **Description**, or **Assignee** are
-    left blank, the action will still proceed, but those specific fields may be overwritten
-    with null or empty values depending on the API's behavior.
+    Updates an existing task in Asana with new details such as assignee, due date,
+    and description.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction**: Retrieves the Asana API Token and Base URL from
-    the integration settings.
+    1. Extracts the provided task ID, assignee email, due date, and description from
+    the action parameters.
 
-    2. **Parameter Retrieval**: Extracts the Task ID and the optional update fields
-    (Assignee, Due Date, Description) from the action input.
+    2. If an assignee is provided, makes a GET request to the Asana API to retrieve
+    the corresponding user ID.
 
-    3. **User Resolution**: If an Assignee email is provided, the action calls the
-    Asana API to retrieve the corresponding User GID.
+    3. Makes a PUT request to the Asana API to update the specified task with the
+    new assignee, due date, and description.
 
-    4. **Task Update**: Executes a PUT request to the Asana API endpoint for the specific
-    Task ID, updating the assignee, due date, and notes.
+    4. Attaches the updated task information to the action's JSON result.
 
-    5. **Result Processing**: Captures the API response, adds the updated task data
-    as a JSON result to the action, and returns a success message.
+
+    ### Additional Notes
+
+    - The assignee email parameter is case-sensitive.
+
+    - The due date must be provided in the `YYYY-MM-DD` format.
+  ai_short_description: >-
+    Updates an existing task in Asana with a new assignee, due date, or description.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -597,14 +1045,50 @@ Update Task:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the properties (assignee, due date, and description) of an existing
-      task in the Asana platform via a PUT request.
-    fetches_data: true
+      Updates an existing task in Asana with a new assignee, due date, or description.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PUT request to the Asana API to update a task's details,
+      which mutates external data. It does not fetch contextual data for entities,
+      nor does it mutate internal SecOps data like entities, alerts, or insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -618,3 +1102,52 @@ Update Task:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It operates solely on the provided action parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates an existing task in Asana, which acts as an external project
+      management or ticketing system. This aligns with the 'Update Ticket' expected
+      outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: true
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Task ID | String | Yes | The task ID can be found in the URL: https://app.asana.com/0/{your_project_ID}/{your_task_ID}
+    |
+
+    | Due Date | String | No | The due date is in the format YYYY-MM-DD |
+
+    | Description | String | No | The task description |
+
+    | Assignee | String | No | The user's email of the person you would like to re-assign
+    the task to. Note: This is case sensitive |

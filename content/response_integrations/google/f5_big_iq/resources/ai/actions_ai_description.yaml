@@ -1,51 +1,31 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Change Policy Enforcement Mode:
   ai_description: >-
-    Changes the enforcement mode of a specific security policy within F5 Big-IQ. This
-    action is used to programmatically switch policies between modes such as 'blocking'
-    or 'transparent' to control how traffic is handled by the security appliance.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | --- | --- | --- | --- |
-
-    | Policy ID | String | Yes | The unique identifier of the policy to be modified.
-    |
-
-    | Enforcement Mode | String | Yes | The target enforcement mode to apply (e.g.,
-    'blocking', 'transparent'). |
+    Changes the enforcement mode of a specified policy in F5 Big-IQ. This action allows
+    users to dynamically update how a policy is enforced (e.g., setting it to 'blocking')
+    directly from the SOAR platform.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action authenticates with the F5 Big-IQ server using
-    the provided credentials and obtains an authentication token.
+    1. Retrieves the `Policy ID` and `Enforcement Mode` from the action parameters.
 
-    2. **Parameter Extraction**: Retrieves the 'Policy ID' and 'Enforcement Mode'
-    from the action parameters.
+    2. Authenticates with the F5 Big-IQ API using the provided integration credentials.
 
-    3. **API Request**: Executes a PATCH request to the F5 Big-IQ REST API endpoint
-    for the specified policy ID, updating the `enforcementMode` field with the new
-    value.
+    3. Sends an HTTP PATCH request to the F5 Big-IQ API (`/mgmt/cm/asm/working-config/policies/{policy_id}`)
+    to update the enforcement mode of the specified policy.
 
-    4. **Completion**: Returns a success status and an informative message to the
-    Google SecOps platform.
+    4. Returns a success message indicating the policy mode was successfully changed.
+
+
+    ### Additional Notes
+
+    This action directly modifies the configuration of a policy on the F5 Big-IQ appliance.
+    Ensure that the provided Policy ID is correct and that the specified enforcement
+    mode is valid for the target policy.
+  ai_short_description: >-
+    Changes the enforcement mode of a specified policy in F5 Big-IQ.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -54,14 +34,51 @@ Change Policy Enforcement Mode:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Modifies the 'enforcementMode' attribute of a security policy on the F5 Big-IQ
-      appliance via a PATCH request.
+      Changes the enforcement mode of a specific policy in F5 Big-IQ.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action executes a PATCH request to the F5 Big-IQ API to change the enforcement
+      mode of a policy, which means it mutates external data (can_mutate_external_data=true).
+      It does not fetch contextual data for enrichment, nor does it mutate internal
+      data, update entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -75,39 +92,82 @@ Change Policy Enforcement Mode:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It operates purely on the provided 'Policy ID' parameter. Therefore,
+      it does not run on entities, and all entity type and filter flags must be false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action modifies the enforcement mode of a policy in F5 Big-IQ. This does
+      not match any of the specific expected outcomes such as enriching an IOC/Asset,
+      updating an alert/ticket, adding/removing an IOC to a blocklist (it modifies
+      a policy, not an IOC), containing a host, or searching events. Therefore, all
+      outcome category flags are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Policy ID | String | Yes | Policy ID |
+
+    | Enforcement Mode | String | Yes | e.g. blocking |
 Get Event Logs By Blocking ID:
   ai_description: >-
     ### General Description
 
-    The **Get Event Logs By Blocking ID** action retrieves detailed event logs from
-    an F5 Big-IQ system associated with a specific Blocking ID (also referred to as
-    a Support ID in F5 ASM). This action allows security analysts to fetch the full
-    context of a blocked request, including violation details, directly into Google
-    SecOps for investigation.
-
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Blocking ID | String | Yes | The unique identifier (Support ID) generated by
-    F5 ASM for a specific blocked or logged event. |
+    Retrieves event logs from F5 BIG-IQ based on a specific blocking ID. This action
+    queries the F5 BIG-IQ system to fetch detailed log records associated with a given
+    support or blocking ID, returning the results as a JSON object for further analysis.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action establishes a session with the F5 Big-IQ server
-    using the configured credentials and retrieves an authentication token.
+    1. Initializes the connection to the F5 BIG-IQ server using the provided credentials.
 
-    2. **Log Retrieval**: It executes a search query against the F5 Big-IQ ASM index
-    (`asmindex`) specifically filtering for the provided `Blocking ID`.
+    2. Retrieves the 'Blocking ID' parameter provided by the user.
 
-    3. **Data Processing**: The action parses the JSON response from the F5 API.
+    3. Makes a POST request to the F5 BIG-IQ API (`mgmt/cm/shared/es/logiq/asmindex/_search`)
+    to search for event logs matching the blocking ID.
 
-    4. **Output**: If matching logs are found, they are added to the action's JSON
-    results. If no logs are found, the action completes with a negative result status.
+    4. If logs are found, attaches the results as a JSON object to the action's output.
+
+    5. Returns a success or failure message based on whether logs were successfully
+    retrieved.
+
+
+    ### Additional Notes
+
+    The action relies on the F5 BIG-IQ search API and requires valid credentials with
+    appropriate permissions to query event logs.
+  ai_short_description: >-
+    Retrieves event logs from F5 BIG-IQ based on a specific blocking ID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -118,10 +178,48 @@ Get Event Logs By Blocking ID:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes an API request to fetch event logs based on a blocking ID.
+      It does not mutate external data (the POST request is used for searching, not
+      state mutation), update internal entities, create insights, or modify alert
+      data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -135,59 +233,79 @@ Get Event Logs By Blocking ID:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It relies solely on
+      the 'Blocking ID' parameter provided as input. Therefore, all entity types and
+      filter flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action queries the F5 BIG-IQ system to retrieve historical event logs matching
+      a specific blocking ID. This directly aligns with the 'Search Events' expected
+      outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: true
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Blocking ID | String | Yes | Blocking ID |
 Ping:
   ai_description: >-
     ### General Description
 
-    Tests the connectivity to the F5 Big-IQ server by attempting to authenticate with
-    the provided credentials. This action ensures that the integration is correctly
-    configured and that the Google SecOps platform can communicate with the F5 Big-IQ
-    API.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Server Address | String | Yes | The hostname or IP address of the F5 Big-IQ
-    server. This is retrieved from the integration configuration. |
-
-    | Username | String | Yes | The username used to authenticate with the F5 Big-IQ
-    server. This is retrieved from the integration configuration. |
-
-    | Password | String | Yes | The password used to authenticate with the F5 Big-IQ
-    server. This is retrieved from the integration configuration. |
-
-    | Verify SSL | Boolean | No | If enabled, the SSL certificate of the server will
-    be verified. Default is False. |
+    Tests connectivity to the F5 Big IQ instance by attempting to authenticate with
+    the provided credentials.
 
 
     ### Flow Description
 
-    1. **Configuration Retrieval**: The action fetches the server address, credentials,
-    and SSL verification settings from the integration's global configuration.
+    1. Retrieves integration configuration parameters (Server Address, Username, Password,
+    Verify SSL).
 
-    2. **Manager Initialization**: An instance of the `F5BigIQManager` is created
-    using the retrieved configuration.
+    2. Initializes the F5BigIQManager.
 
-    3. **Authentication**: During the manager's initialization, it performs a POST
-    request to the `/mgmt/shared/authn/login` endpoint to obtain an authentication
-    token.
+    3. The manager attempts to authenticate with the F5 Big IQ API by making a POST
+    request to the `/mgmt/shared/authn/login` endpoint.
 
-    4. **Token Extension**: Upon receiving a token, the manager immediately sends
-    a PATCH request to `mgmt/shared/authz/tokens/` to extend the session timeout.
+    4. If successful, it extends the token lifetime via a PATCH request to the `/mgmt/shared/authz/tokens/`
+    endpoint.
 
-    5. **Result Reporting**: If the authentication and token extension processes complete
-    successfully, the action returns a "Connection Established" message with a success
-    status. If any step fails, it returns "Connection Failed".
+    5. Returns a success message if the connection is established, or fails otherwise.
 
 
     ### Additional Notes
 
-    This action does not have any specific input parameters; it relies entirely on
-    the integration's shared configuration settings.
+    This action is typically used to verify that the integration is configured correctly
+    and can successfully communicate with the F5 Big IQ API.
+  ai_short_description: >-
+    Tests connectivity to the F5 Big IQ instance by attempting to authenticate with
+    the provided credentials.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -198,10 +316,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action initializes the F5BigIQManager, which performs a login to the F5
+      Big IQ API to verify connectivity. It does not fetch contextual data, mutate
+      external business data, update internal entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -215,3 +370,39 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It only tests connectivity
+      to the external system using integration configuration parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) to verify authentication with
+      the F5 Big IQ API. It does not match any of the specific outcome categories
+      such as enriching IOCs, updating alerts, or containing hosts.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

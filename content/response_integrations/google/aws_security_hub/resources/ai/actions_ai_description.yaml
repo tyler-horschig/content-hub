@@ -1,284 +1,228 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Create Insight:
-  ai_description: "Creates a new insight in AWS Security Hub. Insights are collections\
-    \ of findings that are aggregated by a specific attribute, allowing for better\
-    \ visualization and analysis of security trends within an AWS environment.\n\n\
-    ### Parameters\n| Parameter | Type | Mandatory | Description |\n| :--- | :---\
-    \ | :--- | :--- |\n| Insight Name | String | Yes | The display name for the new\
-    \ insight. |\n| Group By Attribute | String (Dropdown) | Yes | The attribute used\
-    \ to group the findings (e.g., AWS Account ID, Severity Label, Resource Type).\
-    \ |\n| Filter JSON Object | String (JSON) | Yes | A JSON object defining the filters\
-    \ for the findings to be included in the insight. |\n\n### Flow Description\n\
-    1. **Validation**: The action parses and validates the provided `Filter JSON Object`\
-    \ to ensure it is a valid JSON structure.\n2. **Mapping**: It maps the user-friendly\
-    \ `Group By Attribute` selection to the corresponding AWS Security Hub API attribute\
-    \ name.\n3. **Connectivity**: It establishes a connection to the AWS Security\
-    \ Hub service using the provided credentials and region.\n4. **Creation**: It\
-    \ calls the AWS `create_insight` API with the specified name, filters, and grouping\
-    \ criteria.\n5. **Output**: Upon success, it returns the Amazon Resource Name\
-    \ (ARN) of the newly created insight and provides a success message.\n\n### Additional\
-    \ Notes\n* The `Filter JSON Object` must follow the AWS Security Hub `AwsSecurityHubFilters`\
-    \ structure. \n* This action does not operate on specific entities within the\
-    \ Google SecOps case; it performs a global configuration task in AWS."
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: true
-    can_mutate_internal_data: false
-    can_update_entities: false
-    external_data_mutation_explanation: >-
-      Creates a new 'Insight' resource within the AWS Security Hub service.
-    fetches_data: false
-    internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Get Insight Details:
-  ai_description: "### General Description\nThe **Get Insight Details** action retrieves\
-    \ comprehensive information about a specific insight from AWS Security Hub. It\
-    \ provides details on how findings are grouped (e.g., by Resource ID, Account\
-    \ ID) and the counts associated with those groups. This is useful for understanding\
-    \ the scope and distribution of security issues identified by a particular AWS\
-    \ Insight.\n\n### Parameters Description\n| Parameter | Type | Mandatory | Default\
-    \ | Description |\n| :--- | :--- | :--- | :--- | :--- |\n| **Insight ARN** | String\
-    \ | Yes | N/A | The Amazon Resource Name (ARN) of the AWS Security Hub insight\
-    \ you want to query. |\n| **Max Results to Return** | Integer | No | 50 | Limits\
-    \ the number of result values returned in the data table and JSON. If a negative\
-    \ value is provided, the default of 50 is used. |\n\n### Additional Notes\n- This\
-    \ action does not run on entities; it requires a specific Insight ARN as input.\n\
-    - The results are presented both as a structured JSON object and a formatted data\
-    \ table for easy viewing within the case wall.\n\n### Flow Description\n1. **Parameter\
-    \ Extraction**: The action retrieves the AWS credentials from the integration\
-    \ configuration and the Insight ARN and result limit from the action parameters.\n\
-    2. **Connectivity Check**: It initializes the AWS Security Hub manager and validates\
-    \ the connection to the AWS service.\n3. **Data Retrieval**: It requests the insight\
-    \ results from AWS using the provided ARN.\n4. **Data Processing**: The raw AWS\
-    \ response is parsed into a structured format, respecting the `Max Results to\
-    \ Return` limit.\n5. **Output Generation**: \n    - A data table named **Results**\
-    \ is created, showing the grouped attribute values and their respective counts.\n\
-    \    - The full insight details are attached as a JSON result for use in downstream\
-    \ playbook logic."
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: true
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: >-
-      Adds a data table named 'Results' to the case and populates the action's JSON
-      results with the retrieved insight details.
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic tool designed to verify the connectivity between
-    Google SecOps and the AWS Security Hub service. It ensures that the provided AWS
-    credentials (Access Key ID and Secret Key) and the specified region are correct
-    and that the environment can successfully communicate with the AWS API.
-
-
-    ### Parameters Description
-
-    This action does not take any direct input parameters. Instead, it utilizes the
-    global integration configuration parameters:
-
-
-    | Parameter Name | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **AWS Access Key ID** | String | Yes | The access key for the AWS account. |
-
-    | **AWS Secret Key** | String | Yes | The secret key for the AWS account. |
-
-    | **AWS Default Region** | String | Yes | The AWS region where Security Hub is
-    enabled (e.g., us-east-1). |
+    Creates a new insight in AWS Security Hub. This action allows users to define
+    custom insights by specifying a name, a grouping attribute, and a JSON filter
+    object to aggregate findings within the AWS environment.
 
 
     ### Flow Description
 
-    1. **Configuration Extraction:** The action retrieves the AWS Access Key, Secret
-    Key, and Default Region from the integration's configuration settings.
+    1. Extracts the action parameters including Insight Name, Group By Attribute,
+    and Filter JSON Object.
 
-    2. **Manager Initialization:** It initializes the `AWSSecurityHubManager` using
-    the extracted credentials.
+    2. Validates and parses the Filter JSON Object to ensure it is properly formatted.
 
-    3. **Connectivity Test:** The manager executes the `test_connectivity` method,
-    which internally calls the AWS `get_master_account` API method.
+    3. Maps the provided Group By Attribute to the corresponding AWS Security Hub
+    attribute.
 
-    4. **Validation:** The action validates the response from AWS. If the API call
-    returns a successful status code (200), the connection is confirmed.
+    4. Connects to the AWS Security Hub service using the provided integration credentials.
 
-    5. **Result Reporting:** The action returns a success status and message if the
-    connection is established; otherwise, it catches the exception and reports a failure
-    with the error details.
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: false
-    can_mutate_internal_data: false
-    can_update_entities: false
-    external_data_mutation_explanation: null
-    fetches_data: true
-    internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Update Finding:
-  ai_description: >-
-    Updates specific findings in AWS Security Hub. This action allows for the modification
-    of various finding attributes including severity, verification state, workflow
-    status, and notes. It requires the unique Finding ID and the Product ARN to identify
-    the target record.
+    5. Makes an API call to AWS Security Hub to create the insight with the specified
+    parameters.
 
-
-    ### Flow Description
-
-    1. **Parameter Extraction:** Retrieves AWS credentials (Access Key, Secret Key,
-    Region) and action-specific parameters like Finding ID and Product ARN.
-
-    2. **Validation:** Checks that 'Confidence' and 'Criticality' are within the 0-100
-    range. It also ensures that if a 'Note' is provided, a 'Note Author' is also specified
-    (and vice versa), as required by AWS.
-
-    3. **Data Mapping:** Converts user-friendly dropdown selections (e.g., 'High',
-    'Resolved') into the specific string formats expected by the AWS Security Hub
-    API.
-
-    4. **AWS Connection:** Initializes the AWS Security Hub client using Boto3 and
-    validates connectivity.
-
-    5. **Update Execution:** Calls the `batch_update_findings` API to apply the requested
-    changes to the specified finding.
-
-    6. **Result Handling:** Processes the response to determine if the update was
-    successful or if the finding was returned as 'unprocessed' with an error.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | ID | String | Yes | The unique identifier of the finding to update. |
-
-    | Product ARN | String | Yes | The Amazon Resource Name (ARN) of the product that
-    generated the finding. |
-
-    | Note | String | No | New text to add as a note to the finding. Requires 'Note
-    Author'. |
-
-    | Note Author | String | No | The author of the note. Requires 'Note'. |
-
-    | Severity | Dropdown | No | Updates the severity label (Critical, High, Medium,
-    Low, Informational). |
-
-    | Verification State | Dropdown | No | Updates the veracity of the finding (e.g.,
-    True Positive, False Positive). |
-
-    | Confidence | Integer | No | Updates the confidence score (0-100). |
-
-    | Criticality | Integer | No | Updates the resource criticality score (0-100).
-    |
-
-    | Types | String | No | A comma-separated list of finding types (e.g., 'Software
-    and Configuration Checks/Vulnerabilities'). |
-
-    | Workflow Status | Dropdown | No | Updates the investigation status (New, Notified,
-    Resolved, Suppressed). |
-
-    | Custom Fields | String | No | Updates user-defined fields in 'Key:Value,Key:Value'
-    format. |
+    6. Returns the newly created Insight ARN as a JSON result.
 
 
     ### Additional Notes
 
-    - **Note Dependency:** AWS Security Hub requires both 'Note' and 'Note Author'
-    to be present if either is provided. The action will fail validation if only one
-    is filled.
+    The Filter JSON Object must be a valid JSON string representing the attributes
+    and values used to filter the findings included in the insight.
+  ai_short_description: >-
+    Creates a new insight in AWS Security Hub based on a specified grouping attribute
+    and JSON filter.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Creates a new insight configuration in AWS Security Hub.
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes an API call to AWS Security Hub to create a new insight, which
+      mutates external data. It does not fetch data, update internal entities, create
+      internal SecOps insights, or modify alert data.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process any entities. It operates independently
+      of specific entities to create an insight configuration directly in AWS Security
+      Hub.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action creates an insight in AWS Security Hub, which is a custom aggregation
+      of findings. This does not align with any of the predefined outcome categories
+      such as enriching IOCs, updating alerts, or creating tickets.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
 
-    - **Range Constraints:** 'Confidence' and 'Criticality' must be integers between
-    0 and 100.
+    | --- | --- | --- | --- |
+
+    | Insight Name | String | Yes | Specify the name of the insight. |
+
+    | Group By Attribute | Dropdown | Yes | Specify the name of the attribute by which
+    findings should be grouped under one insight. |
+
+    | Filter JSON Object | String | Yes | Specify a filter for the findings. Filter
+    is represented as a JSON object, where you can specify different attributes and
+    values. Please refer to action documentation for more details. |
+Get Insight Details:
+  ai_description: >-
+    ### General Description
+
+    Retrieves detailed information about a specific insight from AWS Security Hub.
+
+
+    ### Flow Description
+
+    1. Initializes the AWS Security Hub client with the provided credentials.
+
+    2. Validates the connection to the AWS Security Hub service.
+
+    3. Calls the AWS Security Hub API (`get_insight_results`) using the provided Insight
+    ARN and maximum results limit.
+
+    4. Parses the returned insight details and formats them into a data table and
+    JSON output.
+
+
+    ### Additional Notes
+
+    This action does not operate on entities and relies entirely on the provided Insight
+    ARN.
+  ai_short_description: >-
+    Retrieves detailed information about a specific insight from AWS Security Hub
+    based on its ARN.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
-    can_mutate_external_data: true
+    can_mutate_external_data: false
     can_mutate_internal_data: false
     can_update_entities: false
-    external_data_mutation_explanation: >-
-      Updates finding attributes such as severity, workflow status, notes, and custom
-      fields directly in the AWS Security Hub service.
-    fetches_data: false
+    external_data_mutation_explanation: null
+    fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a request to AWS Security Hub to fetch insight details. It
+      does not mutate external data, update internal entities, or create case insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -292,38 +236,362 @@ Update Finding:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not use or iterate over any entities. It relies solely on the
+      provided Insight ARN parameter.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches insight details from AWS Security Hub. This does not match
+      any of the predefined outcome categories such as enriching IOCs/assets, updating
+      alerts, or modifying external state.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Insight ARN | String | Yes | Specify the ARN of the insight. |
+
+    | Max Results to Return | String | No | Specify how many results to return. Default
+    is 50. |
+Ping:
+  ai_description: >-
+    ### General Description
+
+    Tests connectivity to the AWS Security Hub service using the provided integration
+    configuration parameters.
+
+
+    ### Flow Description
+
+    1. Extracts integration configuration parameters (AWS Access Key ID, AWS Secret
+    Key, AWS Default Region).
+
+    2. Initializes the AWS Security Hub client.
+
+    3. Calls the `get_master_account` API endpoint via the `test_connectivity` method
+    to verify the connection.
+
+    4. Returns a success or failure message based on the API response.
+
+
+    ### Additional Notes
+
+    This action is typically used to verify that the integration is configured correctly
+    and can communicate with the AWS Security Hub API.
+  ai_short_description: >-
+    Tests connectivity to the AWS Security Hub service using the provided integration
+    configuration parameters.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: false
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: null
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action only tests connectivity by calling a read-only API endpoint (`get_master_account`).
+      It does not fetch contextual data for alerts/entities, mutate external data,
+      mutate internal data, update entities, create insights, modify alert data, or
+      create case comments.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not process any entities. It only tests connectivity to the
+      AWS Security Hub service.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enrichment, containment, or ticket management.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
+Update Finding:
+  ai_description: >-
+    ### General Description
+
+    Updates the properties of a specific finding in AWS Security Hub. This action
+    allows users to modify various attributes of a finding, such as its severity,
+    workflow status, verification state, and custom fields, directly from the SOAR
+    platform.
+
+
+    ### Flow Description
+
+    1. Extracts the target finding's ID and Product ARN, along with the properties
+    to be updated (e.g., Severity, Workflow Status, Note, Confidence).
+
+    2. Validates the provided parameters, ensuring that Confidence and Criticality
+    fall within the accepted range (0-100), and that both 'Note' and 'Note Author'
+    are provided together if either is specified.
+
+    3. Maps the provided values (like Severity and Workflow Status) to the formats
+    accepted by AWS Security Hub.
+
+    4. Makes an API call (`batch_update_findings`) to the AWS Security Hub service
+    to apply the updates to the specified finding.
+
+    5. Evaluates the response to determine if the finding was successfully processed
+    or if it resulted in an unprocessed error, returning the appropriate status and
+    output message.
+
+
+    ### Additional Notes
+
+    Due to AWS Security Hub limitations, if the 'Note' parameter is populated, the
+    'Note Author' parameter must also be provided, and vice versa.
+  ai_short_description: >-
+    Updates the properties of a specific finding in AWS Security Hub.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Updates the properties (such as severity, workflow status, and notes) of a specific
+      finding in AWS Security Hub.
+    fetches_data: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action makes a POST/PATCH request (via boto3 batch_update_findings) to AWS
+      Security Hub to update the properties of a finding, mutating external data.
+      It does not fetch contextual data, mutate internal data, update entities, or
+      create insights.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on entities. It uses explicitly provided parameters
+      (ID and Product ARN) to target a specific finding in AWS Security Hub.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates a finding in AWS Security Hub. This does not match 'Update
+      Alert' (which is for internal SecOps alerts) or 'Update Ticket' (which is for
+      ITSM systems). It does not enrich IOCs/assets, contain hosts, or perform any
+      other categorized outcome.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| ID | String | Yes | Specify ID of the finding that you\
+    \ want to update. |\n| Product ARN | String | Yes | Specify the product ARN of\
+    \ the finding that you want to update. |\n| Note | String | No | Specify new text\
+    \ for the note on the finding. Note: If the \u201CNote\u201D parameter has a value,\
+    \ you should also fill out the \u201CNote Author\u201D parameter. This is an AWS\
+    \ Security Hub limitation. |\n| Note Author | String | No | Specify the author\
+    \ of the note. Note: If the \u201CNote Author\u201D parameter has a value, you\
+    \ should also fill out the \u201CNote\u201D parameter. This is an AWS Security\
+    \ Hub limitation. |\n| Severity | Dropdown | No | Specify new severity for the\
+    \ finding. |\n| Verification State | Dropdown | No | Specify a new verification\
+    \ state for the finding. |\n| Confidence | String | No | Specify new confidence\
+    \ for the finding. |\n| Criticality | String | No | Specify new criticality for\
+    \ the finding. |\n| Types | String | No | Specify a comma-separated list of types\
+    \ for the finding. Example: type1,type2 |\n| Workflow Status | Dropdown | No |\
+    \ Specify new workflow status for the finding. |\n| Custom Fields | String | No\
+    \ | Specify custom fields that should be updated in the finding. Format Custom_field_1:value,Custom_field_2:value\
+    \ |"
 Update Insight:
-  ai_description: "### General Description\nThe **Update Insight** action allows users\
-    \ to modify the configuration of an existing insight within AWS Security Hub.\
-    \ Insights are collections of findings that are grouped together based on specific\
-    \ attributes, helping security teams identify trends and prioritize responses.\
-    \ This action can update the insight's name, the attribute used for grouping findings,\
-    \ and the filters that define which findings are included in the insight.\n\n\
-    ### Parameters Description\n| Parameter | Type | Mandatory | Description |\n|\
-    \ :--- | :--- | :--- | :--- |\n| **Insight ARN** | String | Yes | The Amazon Resource\
-    \ Name (ARN) of the insight that needs to be updated. |\n| **Insight Name** |\
-    \ String | No | The new name to assign to the insight. |\n| **Group By Attribute**\
-    \ | Dropdown | No | The attribute by which findings should be grouped (e.g., AWS\
-    \ Account ID, Severity Label, Resource Type). If 'Select One' is chosen, this\
-    \ parameter is ignored. |\n| **Filter JSON Object** | String (JSON) | No | A JSON-formatted\
-    \ string representing the filters for the findings. This allows for complex filtering\
-    \ logic based on AWS Security Hub's finding schema. |\n\n### Additional Notes\n\
-    - The action requires valid AWS credentials (Access Key, Secret Key, and Default\
-    \ Region) configured in the integration settings.\n- If the **Filter JSON Object**\
-    \ is provided, it must be a valid JSON string; otherwise, the action will fail\
-    \ during the validation phase.\n- If **Group By Attribute** is not specified or\
-    \ set to 'Select One', the existing grouping attribute of the insight remains\
-    \ unchanged.\n\n### Flow Description\n1. **Initialization**: The action retrieves\
-    \ AWS configuration parameters and action-specific inputs (ARN, Name, Grouping,\
-    \ and Filters).\n2. **Validation**: \n    - If a **Filter JSON Object** is provided,\
-    \ it is parsed and validated as a dictionary.\n    - If a **Group By Attribute**\
-    \ is selected, it is mapped to the corresponding AWS Security Hub internal attribute\
-    \ name.\n3. **Connectivity**: The action establishes a connection to the AWS Security\
-    \ Hub service using the provided credentials and validates the connection.\n4.\
-    \ **Execution**: The `update_insight` method is called on the AWS SDK, passing\
-    \ the ARN and any optional parameters provided by the user.\n5. **Completion**:\
-    \ The action returns a success message if the update is accepted by AWS, or an\
-    \ error message if the update fails (e.g., due to invalid ARN or malformed JSON)."
+  ai_description: >-
+    ### General Description
+
+    Updates an existing insight in AWS Security Hub.
+
+
+    ### Flow Description
+
+    1. Extracts the AWS credentials and action parameters.
+
+    2. Validates the provided `Filter JSON Object` and `Group By Attribute`.
+
+    3. Connects to the AWS Security Hub service.
+
+    4. Calls the AWS Security Hub API to update the specified insight with the new
+    name, filters, or group by attribute.
+
+    5. Returns a success message if the update is successful, or an error message
+    otherwise.
+
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Updates an existing insight's configuration in AWS Security Hub.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -332,14 +600,51 @@ Update Insight:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      This action modifies the configuration of an existing insight in AWS Security
-      Hub, including its name, grouping attributes, and finding filters.
+      Updates an existing insight's name, filters, or group by attribute in AWS Security
+      Hub.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action connects to AWS Security Hub and calls the `update_insight` API method
+      to modify an existing insight. It does not fetch data, update internal entities,
+      or create internal insights. Therefore, it mutates external data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -353,3 +658,55 @@ Update Insight:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It operates solely on the provided action parameters (Insight ARN,
+      etc.). Thus, it does not run on entities.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates an insight configuration in AWS Security Hub. This does not
+      align with any of the predefined outcome categories such as enriching IOCs,
+      updating alerts, or containing hosts. Therefore, all outcome category flags
+      are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Insight ARN | String | Yes | Specify the ARN of the insight. |
+
+    | Insight Name | String | No | Specify the new name of the insight. |
+
+    | Group By Attribute | Drop-down list | No | Specify a new name of the attribute
+    by which findings should be grouped under one insight. |
+
+    | Filter JSON Object | String | No | Specify a new filter for the findings. Filter
+    is represented as a JSON object, where you can specify different attributes and
+    values. Please refer to action documentation for more details. |

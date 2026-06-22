@@ -1,34 +1,30 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Ping:
   ai_description: >-
-    ### General Description: The Ping action is a diagnostic tool designed to verify
-    the connectivity between Google SecOps and the Twilio service. It ensures that
-    the provided credentials (Account SID and Authentication Token) are valid and
-    that the environment can successfully communicate with the Twilio API. ### Parameters
-    Description: There are no action-specific parameters for this action. It relies
-    on the integration's global configuration (Account SID and Authentication Token).
-    ### Flow Description: 1. **Initialization**: The action retrieves the AccountSid
-    and AuthenticationToken from the Twilio integration configuration. 2. **Connectivity
-    Test**: It initializes the TwilioManager and attempts to retrieve a single message
-    from the Twilio account using the list_messages method. 3. **Validation**: If
-    the API call succeeds, it confirms the connection is established. If it fails
-    (e.g., due to invalid credentials or network issues), it captures the error and
-    reports a failure. ### Additional Notes: This action is primarily used during
-    the initial setup of the Twilio integration or for troubleshooting communication
-    issues.
+    ### General Description
+
+    Tests connectivity to the Twilio service to ensure the integration is configured
+    correctly and can communicate with the Twilio API.
+
+
+    ### Flow Description
+
+    1. Initializes the Twilio client using the integration-level Account SID and Authentication
+    Token.
+
+    2. Calls the Twilio API to list a single message (`list_messages` with a limit
+    of 1) to verify the credentials and network connection.
+
+    3. Returns a success message if the connection is established, or an error message
+    if the connection or authentication fails.
+
+
+    ### Additional Notes
+
+    This action is primarily used for diagnostic purposes and does not perform any
+    operational tasks or modify any data.
+  ai_short_description: >-
+    Tests connectivity to the Twilio service by attempting to retrieve a single message
+    via the API.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -37,12 +33,50 @@ Ping:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to the Twilio API to list a single message purely
+      to test connectivity. It does not fetch contextual data for alerts/entities,
+      nor does it mutate any external or internal data, update entities, or create
+      insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -56,52 +90,72 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It simply tests the
+      connection to the external service.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enriching IOCs, updating alerts, or mutating
+      external systems.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Send SMS:
   ai_description: >-
     ### General Description
 
-    Sends an SMS message to a specified phone number using the Twilio service. This
-    action is primarily used for automated notifications, multi-factor authentication
-    workflows, or out-of-band communication with stakeholders during an incident response
-    process.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Phone Number | String | True | The target phone number that will receive the
-    SMS. This must include the country dial code (e.g., +1234567890). |
-
-    | Message | String | True | The text content of the SMS message to be sent. |
+    Sends an SMS message to a specified phone number using the Twilio integration.
+    This action initiates an outbound communication to deliver a custom text message
+    to a target recipient.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action retrieves the Twilio Account SID, Authentication
-    Token, and the 'From' phone number from the integration's global configuration.
+    1. Extracts the Twilio account SID, authentication token, and sender phone number
+    from the integration configuration.
 
-    2. **Parameter Extraction**: It extracts the target 'Phone Number' and the 'Message'
-    content provided as action inputs.
+    2. Extracts the target `Phone Number` and `Message` content from the action parameters.
 
-    3. **API Interaction**: The action initializes the Twilio client and calls the
-    messaging API to create and send a new SMS message from the configured Twilio
-    number to the target recipient.
+    3. Initializes the Twilio client with the provided credentials.
 
-    4. **Outcome Reporting**: If the API call is successful, the action completes
-    with a success status and logs the message details. If the API call fails (e.g.,
-    invalid credentials or number), it captures the error and reports a failure.
+    4. Makes an API call to Twilio (`client.api.account.messages.create`) to send
+    the SMS message to the specified destination.
+
+    5. Returns a success message if the SMS is sent successfully, or an error message
+    if the API call fails.
 
 
     ### Additional Notes
 
-    - Ensure the 'SmsPhoneNumber' in the integration settings is a valid Twilio-purchased
-    number or a verified caller ID.
-
-    - The target phone number should follow the E.164 formatting standard for reliable
-    delivery.
+    - The target phone number must include a valid country dial code.
+  ai_short_description: >-
+    Sends an SMS message to a specified phone number using the Twilio integration.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -110,14 +164,50 @@ Send SMS:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Sends an SMS message to an external recipient via the Twilio API, which constitutes
-      an external communication and state change.
+      Creates and sends an SMS message via the Twilio API.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the Twilio API to create and send an SMS
+      message, which mutates external data. It does not fetch contextual data, update
+      internal entities, create insights, or modify alert data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -131,55 +221,82 @@ Send SMS:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process `siemplify.target_entities`. It
+      relies entirely on the provided action parameters (Phone Number and Message)
+      to execute its logic. Therefore, all entity-related flags are set to false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action sends an SMS message via the Twilio API. This directly aligns with
+      the 'Send Message' expected outcome, which involves dispatching a message to
+      a communication app or service.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: true
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Phone Number | String | Yes | Target phone number.The phone number must include
+    a dial code. |
+
+    | Message | String | Yes | Message content. |
 Send SMS And Wait:
   ai_description: >-
     ### General Description
 
-    Sends an SMS message to a target phone number and waits for a response. This action
-    is useful for out-of-band communication or user verification during an investigation.
-    It appends a unique generated ID to the message to track the specific conversation
-    thread.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Phone Number | String | Yes | The target phone number including the dial code
-    (e.g., +123456789). |
-
-    | Message | String | Yes | The content of the SMS message to be sent. |
+    Sends an SMS message to a specified phone number using Twilio and waits asynchronously
+    for a reply containing a generated unique ID.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action generates a unique 5 to 6-digit numeric ID.
+    1. Extracts the target phone number and message content from the action parameters.
 
-    2. **Message Preparation**: The generated ID is appended to the message body along
-    with instructions for the recipient to include the ID in their reply.
+    2. Generates a unique 5 to 6-digit ID and appends it to the message with instructions
+    for the recipient to include it in their reply.
 
-    3. **Transmission**: The SMS is sent to the specified phone number using the Twilio
-    service.
+    3. Makes an API call to Twilio to send the SMS message.
 
-    4. **Async Waiting**: The action enters an 'In Progress' state and stores the
-    ID and timestamp.
+    4. Enters an asynchronous waiting state, periodically querying the Twilio API
+    for new messages received from the target phone number.
 
-    5. **Polling (Query Job)**: The action periodically checks Twilio for incoming
-    messages from the target phone number that were sent after the initial message.
-
-    6. **Verification**: It searches the fetched messages for a body that ends with
-    the specific generated ID.
-
-    7. **Completion**: Once a matching message is found, the action retrieves the
-    reply content and marks the execution as completed.
+    5. Completes execution when a reply containing the unique ID is found, returning
+    the response message.
 
 
     ### Additional Notes
 
-    This is an asynchronous action. It will continue to run in the background until
-    a response is received or the action times out.
+    This is an asynchronous action. It requires the Twilio integration to be configured
+    with a valid Account SID, Authentication Token, and a sender phone number.
+  ai_short_description: >-
+    Sends an SMS message to a target phone number via Twilio and waits asynchronously
+    for a user reply containing a uniquely generated tracking ID.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -191,10 +308,48 @@ Send SMS And Wait:
       Sends an SMS message to a specified phone number via the Twilio API.
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action mutates external data by sending an SMS message via the Twilio API.
+      It also fetches data during its asynchronous query phase by retrieving incoming
+      messages from Twilio. It does not mutate internal SecOps data, update entities,
+      create insights, modify alerts, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -208,3 +363,48 @@ Send SMS And Wait:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It relies entirely on the provided 'Phone Number' parameter. Therefore,
+      all entity type and filtering flags are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action sends an SMS message to a user via Twilio and waits for a response.
+      This aligns with the 'Send Message' expected outcome, which involves sending
+      a message to a communication app or channel.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: true
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Phone Number | String | Yes | Target phone number. The phone number must include
+    a dial code. |
+
+    | Message | String | Yes | Message content. |

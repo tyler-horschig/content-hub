@@ -1,85 +1,37 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Allow IP:
   ai_description: >-
     ### General Description
 
-    This action creates a traffic change request in AlgoSec FireFlow to allow network
-    traffic to specific IP address entities. It is primarily used for automated firewall
-    policy management and incident response containment exceptions. The action treats
-    the target IP entities as the 'Destination' in the generated change request.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Template | String | Yes | The AlgoSec FireFlow template to use for the change
-    request (e.g., 'Standard'). |
-
-    | Source | String | Yes | A comma-separated list of sources for the allow rule.
-    Supports IP addresses, IP Sets, or the keyword 'all'. |
-
-    | Service | String | Yes | A comma-separated list of services to allow (e.g.,
-    'tcp/80', 'udp/53', or 'ALL'). |
-
-    | Subject | String | No | The subject line for the change request. Defaults to
-    'Siemplify Allow IP request'. |
-
-    | Owner | String | No | The username of the person who should own the change request.
-    |
-
-    | Due Date | String | No | The deadline for the request in ISO 8601 format (e.g.,
-    2021-08-13T08:16:10Z). |
-
-    | Expiration Date | String | No | The date when the rule should expire in ISO
-    8601 format. |
-
-    | Custom Fields | String | No | A JSON-formatted string containing additional
-    key-value pairs for custom AlgoSec fields. If provided, this parameter takes priority
-    over individual field parameters like Subject or Owner. |
-
-
-    ### Additional Notes
-
-    - IP address entities are mapped to the **Destination** field of the traffic request.
-
-    - The action includes a 10-second wait period after creation to allow the external
-    system to process the request before fetching final details.
+    This action creates a traffic change request in AlgoSec FireFlow to allow traffic
+    to specified IP address entities. The IP address entities are treated as destinations
+    in the change request.
 
 
     ### Flow Description
 
-    1. **Initialization**: Extracts integration configuration (API Root, Credentials)
-    and action parameters.
+    1. The action filters the target entities to include only IP addresses (ADDRESS).
 
-    2. **Entity Filtering**: Identifies all 'ADDRESS' (IP) entities within the current
-    context.
+    2. It extracts the identifiers (IP addresses) from the filtered entities.
 
-    3. **Request Creation**: Sends a POST request to the AlgoSec FireFlow API to create
-    a new traffic change request using the specified template, source, and service
-    details.
+    3. It makes a POST request to the AlgoSec API (`/FireFlow/api/change-requests/traffic`)
+    to create a new traffic change request with the action set to "Allow".
 
-    4. **Verification**: Waits for a predefined interval (10 seconds) and then performs
-    a GET request to retrieve the full details and status of the newly created change
+    4. It waits for a brief period and then fetches the details of the newly created
     request.
 
-    5. **Output**: Returns the request details as JSON and provides a direct URL link
-    to the change request in the AlgoSec web interface.
+    5. It attaches the JSON result of the request details and a link to the change
+    request in the SecOps platform.
+
+
+    ### Additional Notes
+
+    - IP address entities are treated as destinations in the change request.
+
+    - The `Source` and `Service` parameters can accept a comma-separated list or the
+    special keyword "all".
+  ai_short_description: >-
+    Creates a traffic change request in AlgoSec FireFlow to allow traffic to specified
+    IP address entities, treating them as destinations.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -88,15 +40,50 @@ Allow IP:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Creates a new traffic change request in the AlgoSec FireFlow system to modify
-      firewall/network policies.
-    fetches_data: true
+      Creates a new traffic change request in AlgoSec FireFlow.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to AlgoSec to create a change request, which
+      mutates external data. It does not fetch contextual data for enrichment, does
+      not update internal entities, and does not create insights.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -110,72 +97,109 @@ Allow IP:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `entity.entity_type
+      in SUPPORTED_ENTITY_TYPES`, where `SUPPORTED_ENTITY_TYPES = [EntityTypes.ADDRESS]`.
+      This means it specifically targets ADDRESS entities and filters by the entity_type
+      attribute.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: true
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action creates a traffic change request in AlgoSec FireFlow, which acts
+      as an ITSM/ticketing system for firewall policies. This matches the 'Create
+      Ticket' category, as it generates a new record in an external system and returns
+      the request details.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Template | String | Yes | Specify the template for the change request. |
+
+    | Source | String | Yes | Specify a comma-separated list of sources for the allow
+    rule. It can be an IP address, IP Set or special keyword like (all). |
+
+    | Service | String | Yes | Specify a comma-separated list of services that needs
+    to be allowed. Values can have a look of {TCP/UDP}/{port} (tcp/80) or special
+    reserved keyword (all). |
+
+    | Subject | String | No | Specify the subject for the change request. If nothing
+    is provided action will put "Siemplify Allow IP request" in the subject. |
+
+    | Owner | String | No | Specify who should be the owner of the change request.
+    If nothing is provided, the user that created the ticket will be the owner. |
+
+    | Due Date | String | No | Specify the due date for the change request. Format:
+    ISO 8601. Example: 2021-08-13T08:16:10Z. |
+
+    | Expiration Date | String | No | Specify the expiration date for the change request.
+    Format: ISO 8601. Example: 2021-08-13T08:16:10Z. |
+
+    | Custom Fields | String | No | Specify a JSON object containing information about
+    all of the fields that need to be added to the change request. Note: this parameter
+    has a priority over other fields |
 Block IP:
   ai_description: >-
     ### General Description
 
-    Blocks IP Address entities in AlgoSec by initiating a traffic change request.
-    This action automates the containment of suspicious hosts by requesting a 'Drop'
-    rule on the network security policy managed by AlgoSec. The provided IP entities
-    are treated as the destinations in the generated change request.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Template** | String | Yes | The AlgoSec change request template to use (e.g.,
-    'Standard'). |
-
-    | **Source** | String | Yes | Comma-separated list of sources for the block rule.
-    Can be an IP, IP Set, or the keyword 'all'. |
-
-    | **Service** | String | Yes | Comma-separated list of services to block (e.g.,
-    'tcp/443', 'ALL'). |
-
-    | **Subject** | String | No | The subject for the change request. Defaults to
-    'Siemplify Block IP request'. |
-
-    | **Owner** | String | No | The owner of the change request. Defaults to the ticket
-    creator if not specified. |
-
-    | **Due Date** | String | No | The deadline for the request in ISO 8601 format
-    (e.g., 2021-08-13T08:16:10Z). |
-
-    | **Expiration Date** | String | No | The expiration date for the request in ISO
-    8601 format. |
-
-    | **Custom Fields** | String (JSON) | No | A JSON object containing specific AlgoSec
-    fields. |
-
-
-    ### Additional Notes
-
-    - **Priority Logic:** If the `Custom Fields` parameter is provided, it takes priority
-    over the individual parameters for `Subject`, `Owner`, `Due Date`, and `Expiration
-    Date`.
-
-    - **Entity Role:** All processed IP entities are mapped as the 'destination' in
-    the AlgoSec traffic request.
+    Blocks specific IP address entities by creating a traffic change request in AlgoSec.
+    The action treats the IP address entities as destinations and configures the request
+    to drop traffic from the specified sources and services.
 
 
     ### Flow Description
 
-    1. **Initialization:** Extracts AlgoSec connection details and action parameters
-    from the environment.
+    1. Filters the target entities to include only IP addresses.
 
-    2. **Entity Filtering:** Identifies all `ADDRESS` entities within the target scope.
+    2. Extracts the identifiers (IP addresses) of the filtered entities.
 
-    3. **Request Creation:** Authenticates with AlgoSec and sends a POST request to
-    create a traffic change request with the action set to 'Drop' (Block).
+    3. Makes a POST request to the AlgoSec API (`/FireFlow/api/change-requests/traffic`)
+    to create a change request with the action set to "Drop" for the specified sources,
+    services, and destination IPs.
 
-    4. **Verification:** Pauses for 10 seconds and then retrieves the current details
-    and status of the created request.
+    4. Waits for a brief period (10 seconds) to allow the request to process.
 
-    5. **Reporting:** Attaches the request details as a JSON result and provides a
-    direct URL link to the AlgoSec Change Request in the case wall.
+    5. Makes a GET request to the AlgoSec API to retrieve the details of the newly
+    created change request.
+
+    6. Attaches the request details as a JSON result and provides a link to the change
+    request in the SecOps platform.
+
+
+    ### Additional Notes
+
+    IP address entities are treated as destinations in the change request. The action
+    requires specific parameters such as Template, Source, and Service to successfully
+    construct the change request.
+  ai_short_description: >-
+    Blocks IP address entities by creating a traffic change request in AlgoSec to
+    drop traffic to the specified destinations.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -184,15 +208,53 @@ Block IP:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Creates a new traffic change request in AlgoSec to block traffic to the specified
-      destination IP addresses.
-    fetches_data: true
+      Creates a traffic change request in AlgoSec to block traffic to the specified
+      IP addresses.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action mutates external data by making a POST request to AlgoSec to create
+      a traffic change request (blocking IPs). It does not fetch additional contextual
+      data for enrichment (it only fetches the status of the request it just created).
+      It does not mutate internal data, update entities, create insights, modify alert
+      data, or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -206,59 +268,94 @@ Block IP:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and filters them using `entity.entity_type
+      in SUPPORTED_ENTITY_TYPES`, where `SUPPORTED_ENTITY_TYPES = [EntityTypes.ADDRESS]`.
+      It does not filter by any other entity attributes.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: true
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action creates a traffic change request in AlgoSec to block traffic to specific
+      IP addresses (destinations). This aligns with the 'Add IOC To Blocklist' expected
+      outcome, as it updates security controls to prevent interaction with the IOC.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: "| Parameter | Type | Mandatory | Description |\n| --- |\
+    \ --- | --- | --- |\n| Template | String | Yes | Specify the template for the\
+    \ change request. |\n| Source | String | Yes | Specify a comma-separated list\
+    \ of sources for the block rule. It can be an IP address, IP Set or special keyword\
+    \ like (all). |\n| Service | String | Yes | Specify a comma-separated list of\
+    \ services that needs to be blocked. Values can have a look of {TCP/UDP}/{port}\
+    \ (tcp/80) or special reserved keyword (all). |\n| Subject | String | No | Specify\
+    \ the subject for the change request. If nothing is provided action will put \u201C\
+    Siemplify Block IP request\u201D in the subject. |\n| Owner | String | No | Specify\
+    \ who should be the owner of the change request. If nothing is provided, the user\
+    \ that created the ticket will be the owner. |\n| Due Date | String | No | Specify\
+    \ the due date for the change request. Format: ISO 8601. Example: 2021-08-13T08:16:10Z.\
+    \ |\n| Expiration Date | String | No | Specify the expiration date for the change\
+    \ request. Format: ISO 8601. Example: 2021-08-13T08:16:10Z. |\n| Custom Fields\
+    \ | String | No | Specify a JSON object containing information about all of the\
+    \ fields that need to be added to the change request. Note: this parameter has\
+    \ a priority over other fields |"
 List Templates:
   ai_description: >-
     ### General Description
 
-    The 'List Templates' action retrieves a list of available traffic change request
-    templates from the AlgoSec FireFlow system. This utility action is primarily used
-    to identify valid template IDs or names required for other AlgoSec actions, such
-    as creating 'Allow' or 'Block' IP requests. It supports filtering the results
-    by template name and limiting the number of returned records.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Filter Logic | Dropdown | No | Determines the matching logic for the 'Filter
-    Value'. Options are 'Equal' (exact match) or 'Contains' (substring match). Defaults
-    to 'Equal'. |
-
-    | Filter Value | String | No | The string used to filter template names. If left
-    empty, no filtering is applied. |
-
-    | Max Templates To Return | Integer | No | The maximum number of template records
-    to return in the output. Defaults to 50. Must be greater than 0. |
-
-
-    ### Additional Notes
-
-    - This action does not require or process any entities (IPs, Hostnames, etc.).
-
-    - The results are presented both as a data table ('Available Templates') for the
-    Case Wall and as a raw JSON object for downstream playbook processing.
+    Retrieves a list of available templates from AlgoSec. This action allows users
+    to discover and filter templates configured in the AlgoSec environment, which
+    can be useful for subsequent actions that require a template identifier.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action establishes a session with the AlgoSec FireFlow
-    API using the provided credentials.
+    1. Initializes the connection to the AlgoSec API using the provided integration
+    credentials.
 
-    2. **Data Retrieval**: It performs a GET request to the templates endpoint to
-    fetch all available templates.
+    2. Executes an HTTP GET request to the `/FireFlow/api/templates` endpoint to fetch
+    all available templates.
 
-    3. **Filtering**: If a 'Filter Value' is provided, the action iterates through
-    the retrieved templates and applies the selected 'Filter Logic' (Equal or Contains)
-    against the template names.
+    3. Evaluates the `Filter Value` parameter; if provided, filters the retrieved
+    templates by their name using the specified `Filter Logic` (either exact match
+    via 'Equal' or substring match via 'Contains').
 
-    4. **Limiting**: The resulting list is truncated based on the 'Max Templates To
-    Return' parameter.
+    4. Truncates the resulting list of templates to the number specified in the `Max
+    Templates To Return` parameter.
 
-    5. **Output Generation**: The filtered list is converted into a flat data table
-    and a JSON result, which are then attached to the action output in Google SecOps.
+    5. Outputs the final list of templates as a JSON array and constructs a data table
+    for the case wall.
+
+
+    ### Additional Notes
+
+    If no `Filter Value` is provided, the action will return all available templates
+    up to the specified maximum limit. Ensure the limit is greater than 0.
+  ai_short_description: >-
+    Retrieves a list of available templates from AlgoSec, optionally filtering the
+    results by name and limiting the output count.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -269,10 +366,47 @@ List Templates:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data (templates) from the AlgoSec API via a GET request.
+      It does not mutate external data, mutate internal data, update entities, create
+      insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -286,54 +420,88 @@ List Templates:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities from the case. It
+      simply queries the AlgoSec API for a list of templates based on static action
+      parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves a list of templates from AlgoSec. It does not enrich specific
+      IOCs or assets, update alerts, create tickets, modify blocklists/allowlists,
+      or perform any other operations that match the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Filter Logic | Dropdown | No | Specify what filter logic should be applied (Equal,
+    Contains). |
+
+    | Filter Value | String | No | Specify what value should be used in the filter.
+    If "Equal" is selected, action will try to find the exact match among record types
+    and if "Contains" is selected, action will try to find items that contain that
+    substring. If nothing is provided in this parameter, the filter will not be applied.
+    |
+
+    | Max Templates To Return | Integer | No | Specify how many templates to return.
+    Default: 50. |
 Ping:
   ai_description: >-
     ### General Description
 
-    The **Ping** action is a diagnostic tool used to verify the connectivity between
-    Google SecOps and the AlgoSec server. It validates the integration's configuration
-    by attempting to authenticate and perform a basic API call to ensure the service
-    is reachable and the credentials provided are valid.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **API Root** | String | Yes | The base URL of the AlgoSec instance. |
-
-    | **Username** | String | Yes | The username for the AlgoSec account used for
-    authentication. |
-
-    | **Password** | String | Yes | The password for the AlgoSec account used for
-    authentication. |
-
-    | **Verify SSL** | Boolean | Yes | If enabled, the action verifies the SSL certificate
-    for the connection to the AlgoSec server. |
-
-
-    ### Additional Notes
-
-    This action does not require any input entities and is typically used during the
-    initial setup or troubleshooting of the AlgoSec integration.
+    Tests connectivity to the AlgoSec server to ensure the integration is configured
+    correctly.
 
 
     ### Flow Description
 
-    1. **Initialization:** The action extracts the connection parameters (API Root,
-    Username, Password, and SSL verification status) from the integration configuration.
+    1. Retrieves the integration configuration parameters (API Root, Username, Password,
+    Verify SSL).
 
-    2. **Authentication:** It initializes the `AlgoSecManager`, which triggers an
-    authentication request to the AlgoSec server to obtain a session ID.
+    2. Initializes the AlgoSecManager with the provided credentials.
 
-    3. **Connectivity Test:** The action calls the `test_connectivity` method, which
-    sends a GET request to the templates endpoint to verify that the API is responsive.
+    3. Sends a GET request to the AlgoSec API (`/FireFlow/api/templates`) to test
+    connectivity.
 
-    4. **Completion:** If the requests are successful, it returns a completion state
-    with a success message. If any step fails (e.g., authentication error or network
-    timeout), it catches the exception and returns a failed state with the error details.
+    4. Returns a success message if the connection is established, or a failure message
+    if an error occurs.
+
+
+    ### Additional Notes
+
+    This action does not require any action-specific parameters and does not interact
+    with any entities. It is primarily used for troubleshooting and verifying the
+    integration setup.
+  ai_short_description: >-
+    Tests connectivity to the AlgoSec server using the provided integration configuration
+    parameters.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -342,12 +510,49 @@ Ping:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
-    fetches_data: true
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action only performs a GET request to test connectivity. It does not fetch
+      contextual data for alerts/entities, mutate external or internal data, update
+      entities, or create insights/comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -361,65 +566,75 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It solely tests connectivity
+      to the AlgoSec server.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) and does not match any of the
+      specific outcome categories such as enrichment, containment, or ticket creation.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Wait for Change Request Status Update:
   ai_description: >-
     ### General Description
 
-    This action is designed to monitor and wait for a specific status update of a
-    traffic change request within the AlgoSec FireFlow system. It operates asynchronously,
-    meaning it will periodically poll the AlgoSec API until the change request reaches
-    one of the desired statuses specified by the user or until a timeout occurs. This
-    is primarily used in orchestration workflows where subsequent steps depend on
-    the successful implementation or resolution of a network access request.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Request ID** | String | Yes | The unique identifier of the AlgoSec change
-    request to monitor. |
-
-    | **Status** | String | Yes | A comma-separated list of statuses that the action
-    should wait for. Valid values include: `resolved`, `reconcile`, `open`, `check`,
-    `implementation plan`, `implement`, and `validate`. The action completes successfully
-    once the request reaches any of these states. |
-
-
-    ### Additional Notes
-
-    - **Async Execution:** This action is marked as asynchronous. It will yield execution
-    back to the SOAR engine and retry at intervals until the condition is met or the
-    global timeout is reached.
-
-    - **Timeout Configuration:** Users should ensure the action timeout in the IDE
-    is configured appropriately for the expected duration of the change request process.
-
-    - **Supported Requests:** Only traffic-related change requests are supported by
-    this action.
+    Waits asynchronously for a specific traffic change request in AlgoSec to reach
+    one of the specified target statuses. This action continuously polls the external
+    system until the condition is met or the action times out, returning the final
+    request details once successful.
 
 
     ### Flow Description
 
-    1. **Initialization:** The action extracts connection details (API Root, Credentials)
-    and action parameters (Request ID and target Statuses).
+    1. Extracts the `Request ID` and target `Status` list from the action parameters.
 
-    2. **Validation:** It validates the provided statuses against a list of supported
-    AlgoSec FireFlow statuses.
+    2. Validates the provided statuses against the allowed list of AlgoSec statuses.
 
-    3. **Data Retrieval:** It calls the AlgoSec API to fetch the current details and
-    status of the specified Request ID.
+    3. Makes a GET request to the AlgoSec API (`/FireFlow/api/change-requests/traffic/{request_id}`)
+    to retrieve the current details and status of the specified change request.
 
-    4. **Timeout Check:** It verifies if the action is approaching its execution deadline
-    to ensure a graceful exit if the status hasn't changed in time.
+    4. Evaluates if the current status matches any of the target statuses.
 
-    5. **Status Comparison:**
-        - If the current status of the request matches one of the target statuses,
-    the action completes successfully and returns the full request details as JSON.
-        - If the status does not match, the action sets its state to `IN_PROGRESS`,
-    allowing the SOAR engine to trigger a retry later.
+    5. If a match is found, the action completes successfully and attaches the request
+    details as a JSON result. If not, the action remains in an 'In Progress' state
+    and will re-execute asynchronously until the status matches or a timeout occurs.
+
+
+    ### Additional Notes
+
+    This is an asynchronous action. Ensure the script timeout value in the IDE is
+    adjusted as needed to accommodate long-running change requests. Note that only
+    traffic change requests are supported by this action.
+  ai_short_description: >-
+    Asynchronously monitors a specific traffic change request in AlgoSec until it
+    reaches a designated status.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -430,10 +645,48 @@ Wait for Change Request Status Update:
     external_data_mutation_explanation: null
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action fetches data (change request details) from AlgoSec via a GET request.
+      It does not mutate external data (only reads status), does not mutate internal
+      data, does not update entities, does not create insights, and does not modify
+      alerts or case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -447,3 +700,51 @@ Wait for Change Request Status Update:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with, iterate over, or filter any entities from
+      the case. It relies entirely on the explicitly provided 'Request ID' parameter
+      to fetch data from AlgoSec.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action checks the status of a change request in AlgoSec. It does not enrich
+      IOCs or assets, update alerts, create or update tickets, block or allow IOCs,
+      contain hosts, or perform any of the other specific outcome categories. It simply
+      polls an external system for a status update.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Request ID | String | Yes | Specify the id of the request for which action needs
+    to check the status. |
+
+    | Status | String | Yes | Specify a comma-separated list of change request statuses
+    for which action should wait. Possible values: resolved, reconcile, open, check,
+    implementation plan, implement, validate. |

@@ -1,73 +1,39 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Create Investigation:
   ai_description: >-
     ### General Description
 
-    This action creates new investigations in McAfee Mvision EDR V2 for specific entities,
-    specifically IP addresses and hostnames. It allows security analysts to programmatically
-    initiate guided investigations within the McAfee platform, providing metadata
-    such as priority, case type, and naming conventions to organize the response effort.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | **Case Type** | String | Yes | Defines the category of the alert. Supported
-    values include `Malware`, `Network`, and `IOC`. |
-
-    | **Priority** | String | Yes | Assigns a severity level to the investigation.
-    Supported values are `High`, `Medium`, and `Low`. |
-
-    | **Hint** | String | No | A unique identifier used to automatically link related
-    investigations. If an investigation with the same hint already exists, evidence
-    is added to that case instead of creating a new one. |
-
-    | **Name** | String | No | A custom name for the investigation. If left blank,
-    a default name ('Siemplify Investigation') is used. |
-
-
-    ### Additional Notes
-
-    - The action includes a built-in 10-second delay between processing entities when
-    a **Hint** is provided to prevent triggering API rate limits (429 errors) on the
-    McAfee side.
-
-    - Supported entity types are limited to IP Addresses and Hostnames.
+    Creates a new investigation in McAfee MVISION EDR for specific IP address and
+    hostname entities. This action initiates a state change on the external EDR platform
+    by generating a new investigation record or linking evidence to an existing one
+    based on the provided parameters.
 
 
     ### Flow Description
 
-    1. **Authentication**: The action retrieves credentials (API Key, Client ID/Secret)
-    and obtains an OAuth token from the McAfee IAM service.
+    1. Iterates through the target entities associated with the case.
 
-    2. **Entity Filtering**: It iterates through the target entities in the Google
-    SecOps case, filtering for `ADDRESS` (IP) and `HOSTNAME` types.
+    2. Filters the entities to process only those of type IP Address (`ADDRESS`) and
+    Hostname (`HOSTNAME`).
 
-    3. **Investigation Creation**: For each valid entity, it sends a POST request
-    to the McAfee EDR API (`/edr/v2/investigations`) containing the investigation
-    details (name, priority, type, and the entity identifier as evidence).
+    3. For each valid entity, makes a POST request to the McAfee MVISION EDR API (`/edr/v2/investigations`)
+    to create a new investigation, applying the specified case type, priority, name,
+    and hint.
 
-    4. **Result Processing**: It captures the unique Investigation ID and metadata
-    returned by McAfee.
+    4. Collects the resulting investigation details (such as ID, status, and creation
+    time).
 
-    5. **Output Generation**: The action populates a data table with the investigation
-    details and attaches the raw JSON response for each entity to the action results.
+    5. Returns the investigation details as JSON results and attaches a summary data
+    table to the action results.
+
+
+    ### Additional Notes
+
+    - If the `Hint` parameter is provided, the action automatically pauses for 10
+    seconds between entity processing to avoid HTTP 429 rate-limit errors when adding
+    evidence to an already existing investigation.
+  ai_short_description: >-
+    Creates a new investigation in McAfee MVISION EDR for IP address and hostname
+    entities.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -76,16 +42,51 @@ Create Investigation:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Creates a new investigation resource (case) within the McAfee Mvision EDR platform
-      for each processed entity.
-    fetches_data: true
+      Creates a new investigation record in the McAfee MVISION EDR platform.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a POST request to the McAfee MVISION EDR API to create a new
+      investigation, which mutates external data. It does not fetch contextual data
+      for enrichment, nor does it mutate internal SecOps data, update entities, create
+      insights, or add case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -99,26 +100,90 @@ Create Investigation:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The code iterates over `siemplify.target_entities` and explicitly checks `if
+      entity.entity_type == EntityTypes.ADDRESS` and `elif entity.entity_type == EntityTypes.HOSTNAME`.
+      Therefore, it targets Address and Hostname entities and filters them by their
+      entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action creates an investigation in an EDR platform. While it generates a
+      new record, it does not strictly fit the 'Create Ticket' category which is defined
+      for ITSM systems (like Jira or ServiceNow). It does not enrich data, block IOCs,
+      contain hosts, or perform any of the other specific outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Case Type | Dropdown | Yes | Defines the type of alert. Recognized values are
+    Malware, Network, and IOC. |
+
+    | Priority | Dropdown | Yes | Assigns a priority to the investigation (e.g., High,
+    Medium, Low). |
+
+    | Hint | String | No | Automatically links related investigations and avoids creating
+    many cases from multiple alerts related to the same incident. If the same hint
+    is used, the evidences will be added to the already existing investigation. |
+
+    | Name | String | No | Gives the investigation a meaningful name. If the name
+    is missing, a default case name is assigned. |
 Ping:
   ai_description: >-
-    ### General Description\n\nThe **Ping** action is a diagnostic utility designed
-    to verify the connectivity and authentication between Google SecOps and the McAfee
-    Mvision EDR V2 platform. It ensures that the integration is correctly configured
-    and that the system can successfully communicate with the McAfee API endpoints.\n\n###
-    Parameters Description\n\n| Parameter Name | Type | Mandatory | Description |\n|
-    :--- | :--- | :--- | :--- |\n| N/A | N/A | N/A | This action does not have any
-    input parameters. It relies on the integration's global configuration settings.
-    |\n\n### Additional Notes\n\n- This action utilizes the integration's configuration
-    parameters, including API Root, IAM Root, Client ID, Client Secret, API Key, and
-    Scopes.\n- It is primarily used for initial setup verification and troubleshooting
-    connectivity issues.\n\n### Flow Description\n\n1. **Parameter Extraction**: The
-    action retrieves the integration's global configuration parameters.\n2. **Manager
-    Initialization**: It initializes the McAfee Mvision EDR V2 manager class.\n3.
-    **Authentication Check**: During initialization, the manager attempts to retrieve
-    an OAuth access token from the IAM service using the provided credentials via
-    a GET request.\n4. **Connectivity Confirmation**: If the token is successfully
-    retrieved, the action confirms that the connection is established and reports
-    success.
+    ### General Description
+
+    Tests connectivity to the McAfee Mvision EDR V2 API to ensure the integration
+    is configured correctly.
+
+
+    ### Flow Description
+
+    1. Extracts the integration configuration parameters (e.g., API Root, Client ID,
+    Client Secret).
+
+    2. Initializes the connection manager.
+
+    3. Attempts to authenticate by making a GET request to the IAM endpoint (`/iam/v1.0/token`)
+    to retrieve an access token.
+
+    4. Returns a success message if the connection and authentication are successful,
+    or an error message if they fail.
+
+
+    ### Additional Notes
+
+    This action is typically used to verify credentials and network access during
+    the initial setup of the integration.
+  ai_short_description: >-
+    Tests connectivity to the McAfee Mvision EDR V2 API by attempting to authenticate
+    and retrieve an access token.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -129,10 +194,48 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action only authenticates to the external API to verify connectivity. It
+      does not fetch contextual data for alerts/entities, mutate external data, mutate
+      internal data, update entities, create insights, modify alert data, or create
+      case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -146,3 +249,39 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not process or iterate over any entities. It only tests connectivity
+      to the external service.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple ping/connectivity test. It does not enrich IOCs or assets,
+      update alerts, create tickets, block/allow IOCs, contain hosts, or perform any
+      other specific outcome category.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action

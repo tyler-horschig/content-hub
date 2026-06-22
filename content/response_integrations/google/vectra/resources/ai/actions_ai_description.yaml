@@ -1,57 +1,33 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Add Tags:
   ai_description: >-
-    Adds tags to a specific Endpoint or Detection in Vectra. This action allows users
-    to append new tags to existing ones for better categorization and tracking within
-    the Vectra platform. It first retrieves the current state of the item to ensure
-    existing tags are preserved before applying the update.
+    ### General Description
 
-
-    ### Parameters
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Item Type | String (Enum) | Yes | Select the type of item to tag. Options are
-    'Endpoint' or 'Detection'. |
-
-    | Item ID | String | Yes | The unique identifier of the detection or endpoint
-    in Vectra. |
-
-    | Tags | String | Yes | A comma-separated list of tags to add (e.g., 'tag1, tag2').
-    |
+    Adds tags to a specific endpoint or detection in Vectra. This action modifies
+    the external item by appending the provided tags to its existing tag list.
 
 
     ### Flow Description
 
-    1. **Initialization**: Connects to the Vectra API using the provided credentials
-    and configuration.
+    1. Extracts the target item type (Endpoint or Detection), item ID, and the tags
+    to be added from the action parameters.
 
-    2. **Data Retrieval**: Fetches the current information for the specified Item
-    ID and Item Type to retrieve the existing tags.
+    2. Makes a GET request to the Vectra API to retrieve the current information and
+    existing tags of the specified item.
 
-    3. **Tag Processing**: Parses the input tags string into a list and merges them
-    with the item's current tags to avoid overwriting existing data.
+    3. Appends the new tags to the retrieved existing tags.
 
-    4. **External Update**: Sends a PATCH request to the Vectra API to update the
-    item with the new combined list of tags.
+    4. Makes a PATCH request to the Vectra API to update the item with the combined
+    list of tags.
 
-    5. **Completion**: Reports success if the update is accepted by Vectra, or handles
-    specific exceptions if the item is not found or the update fails.
+    5. Returns a success message if the tags are updated successfully, or an error
+    message if the item is not found or the update fails.
+
+
+    ### Additional Notes
+
+    Tags should be provided as a comma-separated string.
+  ai_short_description: >-
+    Adds tags to a specific endpoint or detection in Vectra.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -60,14 +36,50 @@ Add Tags:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the 'tags' attribute of an Endpoint or Detection object in Vectra via
-      a PATCH request.
-    fetches_data: true
+      Updates the tags of a specific endpoint or detection in Vectra.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PATCH request to the Vectra API to update the tags of a specific
+      endpoint or detection. It does not fetch contextual data for entities, nor does
+      it mutate internal SecOps data, update entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -81,66 +93,146 @@ Add Tags:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on any entities. It relies entirely on the 'Item
+      ID' and 'Item Type' parameters provided by the user to identify the target in
+      Vectra.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates tags on an endpoint or detection in Vectra. This does not
+      match any of the specific outcome categories such as updating an alert within
+      the SecOps platform, enriching an IOC, or containing a host.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Item Type | Dropdown | Yes | Select to which item type you want to add tags
+    (Endpoint or Detection). |
+
+    | Item ID | String | Yes | Specify ID of the detection/endpoint. |
+
+    | Tags | String | Yes | Specify what tags you want to add to detection/endpoint.
+    Tags should be separated by comma, e.g tag1, tag2. |
 Enrich Endpoint:
   ai_description: >-
     ### General Description
 
-    The **Enrich Endpoint** action retrieves comprehensive system information for
-    **Hostname** and **IP Address** entities from the Vectra platform. It provides
-    security analysts with critical context, including threat and certainty scores,
-    host state, associated tags, and network metadata to assist in incident investigation.
-
-
-    ### Parameters Description
-
-    There are no action-specific parameters for this action. It utilizes the global
-    integration configuration parameters:
-
-    * **API Root**: The endpoint URL for the Vectra API.
-
-    * **API Token**: The authentication token for Vectra.
-
-    * **Verify SSL**: Boolean flag to enable or disable SSL certificate verification.
+    Enriches Hostname and IP Address entities by fetching endpoint system information
+    from Vectra. This action retrieves contextual metadata and threat scores for the
+    specified endpoints and updates the entities within the Google SecOps platform.
 
 
     ### Flow Description
 
-    1. **Entity Identification**: The action filters the target entities in the current
-    context, selecting only those of type `HOSTNAME` or `ADDRESS`.
+    1. Initializes the Vectra API client using the provided integration configuration.
 
-    2. **Vectra Query**: For each identified entity, the action queries the Vectra
-    API (`/api/v2.1/hosts`) using the entity's identifier (name for hostnames, IP
-    for addresses).
+    2. Filters the target entities to include only those of type `HOSTNAME` or `ADDRESS`.
 
-    3. **Result Filtering**: The action processes the paginated results from Vectra
-    and performs a case-insensitive match against the entity's identifier to ensure
-    data accuracy.
+    3. Iterates through the filtered entities and makes a GET request to the Vectra
+    API (`api/v2.1/hosts`) to retrieve endpoint details based on the entity's identifier.
 
-    4. **Data Enrichment**: For matching endpoints, the action:
-        *   Flattens the Vectra host metadata and updates the entity's `additional_properties`
-    with a 'Vectra' prefix.
-        *   Sets the entity's `is_enriched` attribute to `True`.
-        *   Generates a detailed data table for the entity within the SOAR interface.
-    5. **Internal Update**: The action updates the modified entities within Google
-    SecOps and attaches the raw JSON results to the action output.
+    4. Filters the retrieved endpoints to find an exact match with the entity's identifier
+    (matching either the endpoint name or IP).
+
+    5. If a match is found, extracts the enrichment data and updates the entity's
+    `additional_properties`, marking it as enriched.
+
+    6. Adds the endpoint details to the action's JSON results and creates an entity
+    table.
+
+    7. Updates the successfully enriched entities in the Google SecOps platform.
+
+
+    ### Additional Notes
+
+    - If multiple matches are found in Vectra for a single entity, the action will
+    use the first match for enrichment.
+
+    - Entities that do not return any matching endpoints from Vectra will be skipped
+    and reported as failed in the output message.
+  ai_short_description: >-
+    Enriches Hostname and IP Address entities by fetching endpoint system information
+    and threat scores from Vectra.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: true
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      Updates entity additional properties with Vectra host metadata and sets the
-      is_enriched flag to true.
-  categories:
-    enrichment: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from the Vectra API via a GET request to retrieve endpoint
+      details. It does not mutate external data. It updates the internal entities
+      with the fetched enrichment data by calling `siemplify.update_entities`. It
+      does not create insights, modify alert data, or create case comments.
   entity_usage:
     entity_types:
-    - ADDRESS
-    - HOSTNAME
+      address: true
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: true
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -154,69 +246,126 @@ Enrich Endpoint:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action iterates over `siemplify.target_entities` and explicitly filters
+      them using `entity.entity_type == EntityTypes.ADDRESS or entity.entity_type
+      == EntityTypes.HOSTNAME`. Therefore, it targets Address and Hostname entities
+      and filters by entity type.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: true
+    enrich_ioc: true
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action retrieves endpoint details (such as state, privilege level, groups,
+      and tags) which aligns with 'Enrich Asset'. It also retrieves threat and certainty
+      scores for IP addresses and hostnames, which aligns with 'Enrich IOC'. It does
+      not perform any containment, blocking, or ticketing operations.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Get Triage Rule Details:
   ai_description: >-
     ### General Description
 
-    Retrieves detailed information about specific triage rules from the Vectra platform
-    using their unique identifiers. This action is useful for security analysts to
-    understand the logic and categorization behind specific detections and triage
-    decisions within Vectra.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Triage Rule IDs | String | Yes | A comma-separated list of triage rule IDs to
-    retrieve details for (e.g., "28,29"). |
-
-    | Create Insights | Boolean | No | If enabled (default), the action will create
-    a separate case insight for every successfully processed triage rule. |
+    Retrieves detailed information about specific triage rules from Vectra. This action
+    fetches the configuration and metadata of the requested triage rules and can optionally
+    generate case insights for each rule.
 
 
     ### Flow Description
 
-    1. **Parameter Extraction**: The action parses the comma-separated string of Triage
-    Rule IDs provided by the user.
+    1. Extracts the provided comma-separated list of Triage Rule IDs.
 
-    2. **API Interaction**: For each ID, the action makes a GET request to the Vectra
-    API endpoint `/api/v2.1/rules/{triage_id}`.
+    2. Iterates over each ID and makes a GET request to the Vectra API (`/api/v2.1/rules/{triage_id}`)
+    to fetch the triage rule details.
 
-    3. **Data Processing**: The retrieved data is parsed into a structured triage
-    rule object containing fields like Detection Category, Triage Category, and Description.
+    3. If the `Create Insights` parameter is enabled, generates a case insight containing
+    the detection category, triage category, detection, and description for each successfully
+    retrieved triage rule.
 
-    4. **Internal Mutation (Optional)**: If the 'Create Insights' parameter is true,
-    the action generates a case insight for each rule found.
-
-    5. **Output Generation**: The action produces a JSON result containing the full
-    details of all found rules and populates a data table named 'Triage Rules Details'
-    in the case wall.
+    4. Compiles the retrieved data into a JSON result and a data table for further
+    use in the playbook.
 
 
     ### Additional Notes
 
-    This action does not process entities from the case scope; it relies entirely
-    on the IDs provided in the input parameters.
+    If a specified triage rule ID is not found in Vectra, the action will skip it
+    and report the failure in the output message.
+  ai_short_description: >-
+    Retrieves detailed information about specific triage rules from Vectra.
   capabilities:
     can_create_case_comments: false
     can_create_insight: true
     can_modify_alert_data: false
     can_mutate_external_data: false
-    can_mutate_internal_data: true
+    can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: null
     fetches_data: true
-    internal_data_mutation_explanation: >-
-      The action creates case insights containing triage rule details (Detection Category,
-      Triage Category, Detection, and Description) if the 'Create Insights' parameter
-      is set to true.
-  categories:
-    enrichment: false
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches data from Vectra using a GET request. It does not mutate
+      external data. It can create case insights if the 'Create Insights' parameter
+      is enabled. It does not update entities or modify alert data.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -230,29 +379,76 @@ Get Triage Rule Details:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on entities. It uses a manually provided list of
+      Triage Rule IDs as input parameters.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action fetches configuration details for triage rules from Vectra. It does
+      not enrich IOCs or assets, update alerts, or perform any containment or remediation
+      actions. Therefore, it does not match any of the specific outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Triage Rule IDs | String | Yes | Specify a comma-separated list of triage rule
+    IDs. Example: 28,29. |
+
+    | Create Insights | Boolean | No | If enabled, action will create a separate insight
+    for every processed triage rule. |
 Ping:
-  ai_description: "### General Description\nThe **Ping** action is a diagnostic tool\
-    \ designed to verify the connectivity between Google SecOps and the Vectra server.\
-    \ It ensures that the provided API credentials (API Root and API Token) are valid\
-    \ and that the network path is open. This action is typically used during the\
-    \ initial setup of the Vectra integration or for troubleshooting connection issues.\n\
-    \n### Parameters Description\n| Parameter | Type | Mandatory | Description |\n\
-    | :--- | :--- | :--- | :--- |\n| API Root | String | Yes | The base URL of the\
-    \ Vectra instance (e.g., `https://<vectra_hostname>`). |\n| API Token | String\
-    \ | Yes | The API token used for authenticating requests to the Vectra API. |\n\
-    | Verify SSL | Boolean | Yes | Specifies whether to verify the SSL certificate\
-    \ of the Vectra server. Default is `True`. |\n\n### Additional Notes\n- This action\
-    \ does not process any entities.\n- It performs a simple `GET` request to the\
-    \ `/api/v2.1/hosts` endpoint to validate the connection.\n\n### Flow Description\n\
-    1. **Parameter Extraction**: The action retrieves the `API Root`, `API Token`,\
-    \ and `Verify SSL` settings from the integration configuration.\n2. **Manager\
-    \ Initialization**: It initializes the `VectraManager` with the provided connection\
-    \ details.\n3. **Connectivity Test**: The manager executes the `test_connectivity`\
-    \ method, which sends a `GET` request to the Vectra hosts endpoint.\n4. **Result\
-    \ Handling**: \n    - If the request is successful (HTTP 200), the action completes\
-    \ with a success message.\n    - If the request fails (e.g., invalid token, network\
-    \ timeout), an exception is caught, and the action reports a failure with the\
-    \ error details."
+  ai_description: >-
+    ### General Description
+
+    Tests connectivity to the Vectra server using the parameters provided at the integration
+    configuration page.
+
+
+    ### Flow Description
+
+    1. Extracts the integration configuration parameters (API Root, API Token, Verify
+    SSL).
+
+    2. Makes a GET request to the Vectra API (`api/v2.1/hosts`) to verify connectivity.
+
+    3. Returns a success message if the connection is established, or an error message
+    if it fails.
+
+
+    ### Additional Notes
+
+    This action does not require any entities or action-specific parameters to execute.
+  ai_short_description: >-
+    Tests connectivity to the Vectra server using the provided integration configuration
+    parameters.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -263,10 +459,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a GET request to test connectivity but does not fetch contextual
+      data for alerts or entities. It does not mutate external data, internal data,
+      update entities, create insights, modify alert data, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -280,41 +513,207 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over `siemplify.target_entities` or use any entity-specific
+      identifiers. It only tests connectivity to the external service.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action only tests connectivity to the Vectra server. It does not enrich
+      IOCs, mutate external data, or interact with alerts, tickets, or emails. Therefore,
+      it does not match any of the expected outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Remove Tags:
   ai_description: >-
-    Removes specified tags from a Vectra Endpoint or Detection based on a provided
-    ID. This action first retrieves the current tags associated with the item, identifies
-    the tags to be removed, and then updates the item in Vectra with the revised tag
-    list.
+    ### General Description
+
+    Removes specified tags from an endpoint or detection in Vectra.
 
 
-    ### Parameters
+    ### Flow Description
 
+    1. Retrieves the current information and existing tags for the specified endpoint
+    or detection from Vectra using a GET request to `api/v2.1/hosts/{item_id}` or
+    `api/v2.1/detections/{item_id}`.
+
+    2. Calculates the new list of tags by removing the user-specified tags from the
+    existing ones.
+
+    3. Updates the tags on the endpoint or detection in Vectra using a PATCH request
+    to `/api/v2.1/tagging/host/{item_id}` or `/api/v2.1/tagging/detection/{item_id}`.
+
+
+    ### Additional Notes
+
+    The action will fail if the specified item is not found or if the tags to be removed
+    do not exist on the item.
+  ai_short_description: >-
+    Removes specified tags from an endpoint or detection in Vectra.
+  capabilities:
+    can_create_case_comments: false
+    can_create_insight: false
+    can_modify_alert_data: false
+    can_mutate_external_data: true
+    can_mutate_internal_data: false
+    can_update_entities: false
+    external_data_mutation_explanation: >-
+      Removes specified tags from an endpoint or detection in Vectra.
+    fetches_data: true
+    internal_data_mutation_explanation: null
+    reasoning: >-
+      The action fetches the current item information from Vectra (fetches_data=true)
+      and then sends a PATCH request to update the tags on the item in Vectra (can_mutate_external_data=true).
+      It does not modify internal SecOps data, update entities, or create insights.
+  entity_usage:
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
+    filters_by_additional_properties: false
+    filters_by_alert_identifier: false
+    filters_by_case_identifier: false
+    filters_by_creation_time: false
+    filters_by_entity_type: false
+    filters_by_identifier: false
+    filters_by_is_artifact: false
+    filters_by_is_enriched: false
+    filters_by_is_internal: false
+    filters_by_is_pivot: false
+    filters_by_is_suspicious: false
+    filters_by_is_vulnerable: false
+    filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process `siemplify.target_entities`. It
+      relies entirely on the provided action parameters (Item Type, Item ID) to identify
+      the target in Vectra.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action removes tags from an endpoint or detection in Vectra. This does not
+      align with any of the predefined outcome categories such as updating alerts
+      within SecOps, containing hosts, or enriching IOCs.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
     | Parameter | Type | Mandatory | Description |
 
     | --- | --- | --- | --- |
 
-    | Item Type | String | Yes | The type of item to target: 'Endpoint' or 'Detection'.
-    |
+    | Item Type | Drop-down | Yes | Select from which item type you want to remove
+    tags (Endpoint or Detection). |
 
-    | Item ID | String | Yes | The unique ID of the endpoint or detection in Vectra.
-    |
+    | Item ID | String | Yes | Specify ID of the detection/endpoint. |
 
-    | Tags | String | Yes | A comma-separated list of tags to be removed (e.g., 'tag1,
-    tag2'). |
+    | Tags | String | Yes | Specify what tags you want to remove from detection/endpoint.
+    Tags should be separated by comma, e.g tag1, tag2. |
+Update Detection Status:
+  ai_description: >-
+    ### General Description
+
+    Updates the status of a specific detection in Vectra. This action initiates a
+    state change on the external Vectra system to mark a detection as Fixed or Inactive.
 
 
     ### Flow Description
 
-    1. **Fetch Item Info:** The action retrieves the current metadata (including tags)
-    for the specified Item ID and Type from Vectra using a GET request.
+    1. Extracts the `Detection ID` and `Status` parameters provided by the user.
 
-    2. **Tag Comparison:** It compares the provided tags to remove against the existing
-    tags on the item to determine which ones can be successfully deleted.
+    2. Initializes the Vectra API client.
 
-    3. **Update Tags:** If matches are found, it sends a PATCH request to the Vectra
-    tagging endpoint with the updated tag list (the original list minus the tags specified
-    for removal).
+    3. Makes a PATCH request to the Vectra API to update the status of the specified
+    detection.
+
+    4. Returns a success message if the update is successful, or an error message
+    if the operation fails.
+
+
+    ### Additional Notes
+
+    Ensure that the provided Detection ID is valid and exists within the Vectra environment.
+  ai_short_description: >-
+    Updates the status of a specific detection in Vectra.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -323,59 +722,50 @@ Remove Tags:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Removes specified tags from an endpoint or detection in Vectra by updating the
-      item's tag list via a PATCH request.
-    fetches_data: true
-    internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
-  entity_usage:
-    entity_types: []
-    filters_by_additional_properties: false
-    filters_by_alert_identifier: false
-    filters_by_case_identifier: false
-    filters_by_creation_time: false
-    filters_by_entity_type: false
-    filters_by_identifier: false
-    filters_by_is_artifact: false
-    filters_by_is_enriched: false
-    filters_by_is_internal: false
-    filters_by_is_pivot: false
-    filters_by_is_suspicious: false
-    filters_by_is_vulnerable: false
-    filters_by_modification_time: false
-Update Detection Status:
-  ai_description: "Updates the status of a specific detection within the Vectra platform.\
-    \ This action allows analysts to programmatically mark detections as 'Fixed' or\
-    \ 'Inactive' based on their investigation results. \n\n### Parameters\n| Parameter\
-    \ | Type | Mandatory | Description |\n| :--- | :--- | :--- | :--- |\n| Detection\
-    \ ID | Integer | Yes | The unique identifier of the detection in Vectra that needs\
-    \ a status update. |\n| Status | String | Yes | The new status to apply to the\
-    \ detection. Supported values are 'Fixed' and 'Inactive'. |\n\n### Flow Description\n\
-    1. **Initialization**: Retrieves the Vectra API configuration (Root URL, Token,\
-    \ and SSL verification) and the action parameters (Detection ID and Status).\n\
-    2. **API Interaction**: Uses the Vectra Manager to send a PATCH request to the\
-    \ Vectra API endpoint.\n3. **Status Mapping**: If the 'Status' parameter is set\
-    \ to 'Fixed', it sends a 'mark_as_fixed' flag as True; otherwise, it is set to\
-    \ False.\n4. **Execution Result**: Confirms the successful update or catches exceptions\
-    \ (such as unknown tags or connection errors) and reports the failure to the SOAR\
-    \ case wall."
-  capabilities:
-    can_create_case_comments: false
-    can_create_insight: false
-    can_modify_alert_data: false
-    can_mutate_external_data: true
-    can_mutate_internal_data: false
-    can_update_entities: false
-    external_data_mutation_explanation: >-
-      Updates the status of a detection record in the Vectra platform to either 'Fixed'
-      or 'Inactive' using a PATCH request.
+      Updates the status of a specific detection in the Vectra system.
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PATCH request to the Vectra API to update the status of a
+      detection, which mutates external data. It does not fetch data for enrichment,
+      nor does it mutate internal SecOps data, update entities, or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -389,45 +779,77 @@ Update Detection Status:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not operate on entities. It relies entirely on the explicitly
+      provided 'Detection ID' parameter to perform its task.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates the status of a detection in the external Vectra system.
+      It does not update an alert within the SecOps platform, nor does it match any
+      other specific outcome category such as updating a ticket or blocking an IOC.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Detection ID | String | Yes | Specify the detection ID on which you want to
+    update the status. |
+
+    | Status | String | Yes | Specify what status to set on the detection. |
 Update Note:
   ai_description: >-
     ### General Description
 
-    Updates the note associated with a specific item in Vectra, which can be either
-    an Endpoint or a Detection. This action is used to append or modify administrative
-    or investigative notes directly within the Vectra platform for better tracking
-    and collaboration.
-
-
-    ### Parameters Description
-
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Item Type | String (Dropdown) | Yes | Specifies the type of Vectra object to
-    update. Options are 'Endpoint' or 'Detection'. |
-
-    | Item ID | String | Yes | The unique identifier of the specific endpoint or detection
-    in Vectra. |
-
-    | Note | String | Yes | The text content to be set as the note for the specified
-    item. |
+    Updates a note for a specific endpoint or detection in Vectra.
 
 
     ### Flow Description
 
-    1. **Initialization**: The action initializes the Vectra Manager using the provided
-    API credentials and configuration.
+    1. Retrieves the provided Item Type (Endpoint or Detection), Item ID, and Note
+    from the action parameters.
 
-    2. **Validation**: It first attempts to retrieve information about the specified
-    item (Endpoint or Detection) using the provided `Item ID` to ensure it exists.
+    2. Makes a GET request to the Vectra API to verify the existence of the specified
+    item.
 
-    3. **Mutation**: If the item is found, the action sends a PATCH request to the
-    Vectra API to update the 'note' field with the provided text.
+    3. If the item exists, makes a PATCH request to the Vectra API to update the note
+    on the specified endpoint or detection.
 
-    4. **Completion**: The action returns a success message if the update is confirmed
-    by the API, or an error message if the item is not found or the update fails.
+    4. Returns a success message if the note is updated successfully, or an error
+    message if the item is not found or the update fails.
+
+
+    ### Additional Notes
+
+    None.
+  ai_short_description: >-
+    Updates a note for a specific endpoint or detection in Vectra.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -436,14 +858,51 @@ Update Note:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      Updates the 'note' attribute of a host (endpoint) or detection object in the
-      Vectra platform via a PATCH request.
-    fetches_data: true
+      Updates a note on a specific endpoint or detection in the Vectra platform.
+    fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action makes a PATCH request to the Vectra API to update a note on a specific
+      endpoint or detection, which mutates external data. It does not fetch contextual
+      data for enrichment, nor does it mutate internal SecOps data, update entities,
+      or create insights.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -457,3 +916,53 @@ Update Note:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not iterate over or process `siemplify.target_entities`. It
+      relies entirely on the explicitly provided 'Item ID' and 'Item Type' action
+      parameters. Therefore, it does not run on entities and all entity-related flags
+      are false.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action updates a note on an external endpoint or detection in Vectra. This
+      does not align with any of the predefined outcome categories such as Enrich
+      IOC, Contain Host, or Update Alert (which applies to the SecOps platform). Therefore,
+      all outcome category flags are false.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Item Type | String | Yes | Select on which item type you want to update a note.
+    |
+
+    | Item ID | String | Yes | Specify ID of the detection/endpoint. |
+
+    | Note | String | Yes | Specify what note you want to have on the detection/endpoint.
+    |

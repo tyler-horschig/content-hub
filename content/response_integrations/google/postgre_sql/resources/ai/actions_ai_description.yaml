@@ -1,52 +1,33 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 Ping:
   ai_description: >-
     ### General Description
 
-    Tests the connectivity to a PostgreSQL database instance to verify that the integration
-    configuration is correct and the database is accessible. This action is primarily
-    used for troubleshooting and ensuring that the SOAR platform can communicate with
-    the target database.
-
-
-    ### Parameters Description
-
-    There are no parameters for this action. It utilizes the global integration configuration
-    settings, including Server Address, Username, Password, Port, and Database Name
-    For Testing.
-
-
-    ### Additional Notes
-
-    This action does not perform any queries or data retrieval; it simply validates
-    the network connection and authentication credentials.
+    Tests connectivity to a PostgreSQL database to ensure the integration is configured
+    correctly and the database is reachable.
 
 
     ### Flow Description
 
-    1. Retrieve connection parameters (Server Address, Username, Password, Port, and
-    Database Name) from the PostgreSQL integration configuration.
+    1. Retrieves the integration configuration parameters (Server Address, Username,
+    Password, Port, and Database Name).
 
-    2. Initialize the PostgreSQLManager, which attempts to establish a connection
-    to the specified database using the provided credentials.
+    2. Attempts to establish a connection to the PostgreSQL database using the provided
+    credentials via the `psycopg2` library.
 
-    3. Close the connection immediately upon a successful handshake.
+    3. Closes the connection immediately upon successful authentication.
 
-    4. Return a success message to the Google SecOps platform if the connection was
-    established without errors.
+    4. Returns a success message if no exceptions are raised during the connection
+    attempt.
+
+
+    ### Additional Notes
+
+    This is a standard utility action used primarily during integration setup to verify
+    network connectivity and credential validity. It does not execute any queries
+    or modify any data.
+  ai_short_description: >-
+    Tests connectivity to a PostgreSQL database by attempting to establish and immediately
+    close a connection using the configured credentials.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -57,10 +38,47 @@ Ping:
     external_data_mutation_explanation: null
     fetches_data: false
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action only establishes a connection to the PostgreSQL database and immediately
+      closes it. It does not fetch contextual data, mutate external data, mutate internal
+      data, update entities, create insights, modify alerts, or create case comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -74,56 +92,70 @@ Ping:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It solely relies
+      on integration configuration parameters to test database connectivity.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action is a simple connectivity test (Ping) to a PostgreSQL database. It
+      does not enrich data, mutate alerts, interact with tickets, modify blocklists,
+      or perform any other operations that match the defined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: There are no parameters for this action
 Run SQL Query:
   ai_description: >-
-    This action executes a custom SQL query against a specified PostgreSQL database.
-    It is designed to handle both data retrieval (SELECT) and data manipulation (INSERT,
-    UPDATE, DELETE) or schema changes, as it automatically commits the transaction.
-    The results of the query are returned as a JSON object and visualized within a
-    data table in the Google SecOps interface.
+    ### General Description
+
+    Executes a specified SQL query on a PostgreSQL database. This action connects
+    to the database using the provided credentials and executes the query, returning
+    the results in JSON and CSV formats.
 
 
-    ### Flow Description:
+    ### Flow Description
 
-    1. **Connection**: Establishes a connection to the PostgreSQL server using the
-    provided configuration (Server Address, Username, Password, Port) and the specific
-    'Database Name' parameter.
+    1. Connects to the PostgreSQL database using the integration configuration and
+    the provided 'Database Name'.
 
-    2. **Execution**: Executes the provided SQL 'Query' string directly on the database.
+    2. Executes the SQL query provided in the 'Query' parameter.
 
-    3. **Commitment**: Commits the transaction to ensure any changes made by the query
-    are persisted in the database.
+    3. If the query returns results (e.g., a SELECT statement), formats the output
+    as a JSON object and a CSV data table.
 
-    4. **Data Processing**: If the query returns rows (e.g., a SELECT statement),
-    the action fetches the column names and row data, converting them into a structured
-    format.
-
-    5. **Output**: Generates a CSV-formatted data table named 'PostgreSQL Query Results'
-    and attaches the full result set as a JSON object to the action output.
+    4. Returns the results to the SecOps platform.
 
 
-    ### Parameters Description:
+    ### Additional Notes
 
-    | Parameter | Type | Mandatory | Description |
-
-    | :--- | :--- | :--- | :--- |
-
-    | Database Name | String | Yes | The name of the specific PostgreSQL database
-    to connect to and run the query against. |
-
-    | Query | String | Yes | The SQL statement to be executed. This can be a data
-    retrieval query (SELECT) or a data modification query (INSERT, UPDATE, DELETE).
-    |
-
-
-    ### Additional Notes:
-
-    - **Security Warning**: Since this action allows for arbitrary SQL execution,
-    ensure that the query provided is safe and that the database user has the minimum
-    necessary permissions.
-
-    - **Transaction Handling**: The action performs a `commit()` after execution,
-    meaning any data modifications will be permanent.
+    The action can execute any valid SQL query, including SELECT, INSERT, UPDATE,
+    or DELETE, depending on the permissions of the provided credentials.
+  ai_short_description: >-
+    Executes a specified SQL query on a PostgreSQL database and returns the results.
   capabilities:
     can_create_case_comments: false
     can_create_insight: false
@@ -132,15 +164,52 @@ Run SQL Query:
     can_mutate_internal_data: false
     can_update_entities: false
     external_data_mutation_explanation: >-
-      The action executes arbitrary SQL queries and explicitly calls a commit on the
-      database connection, allowing for INSERT, UPDATE, DELETE, and other state-changing
-      operations on the external PostgreSQL database.
+      The action can execute any SQL query, including INSERT, UPDATE, or DELETE statements,
+      which can modify data within the PostgreSQL database.
     fetches_data: true
     internal_data_mutation_explanation: null
-  categories:
-    enrichment: false
+    reasoning: >-
+      The action executes a SQL query which can fetch data (SELECT) or mutate external
+      data (INSERT/UPDATE/DELETE) in the PostgreSQL database. It does not mutate internal
+      SecOps data, update entities, create insights, modify alerts, or create case
+      comments.
   entity_usage:
-    entity_types: []
+    entity_types:
+      address: false
+      alert: false
+      application: false
+      child_hash: false
+      child_process: false
+      cluster: false
+      container: false
+      credit_card: false
+      cve: false
+      cve_id: false
+      database: false
+      deployment: false
+      destination_domain: false
+      domain: false
+      email_message: false
+      event: false
+      file_hash: false
+      file_name: false
+      generic: false
+      host_name: false
+      ip_set: false
+      mac_address: false
+      parent_hash: false
+      parent_process: false
+      phone_number: false
+      pod: false
+      process: false
+      service: false
+      source_domain: false
+      threat_actor: false
+      threat_campaign: false
+      threat_signature: false
+      url: false
+      usb: false
+      user: false
     filters_by_additional_properties: false
     filters_by_alert_identifier: false
     filters_by_case_identifier: false
@@ -154,3 +223,47 @@ Run SQL Query:
     filters_by_is_suspicious: false
     filters_by_is_vulnerable: false
     filters_by_modification_time: false
+    reasoning: >-
+      The action does not interact with or process any entities. It solely relies
+      on the provided parameters to execute a SQL query.
+  outcome_categories:
+    add_alert_comment: false
+    add_ioc_to_allowlist: false
+    add_ioc_to_blocklist: false
+    contain_host: false
+    create_ticket: false
+    delete_email: false
+    disable_identity: false
+    download_file: false
+    enable_identity: false
+    enrich_asset: false
+    enrich_ioc: false
+    execute_command_on_the_host: false
+    get_alert_information: false
+    reasoning: >-
+      The action executes a generic SQL query on a PostgreSQL database. It does not
+      specifically enrich IOCs/assets, manage alerts/tickets, modify blocklists/allowlists,
+      manage identities, contain hosts, or perform specific email/file operations.
+      Therefore, it does not map to any of the predefined outcome categories.
+    remove_ioc_from_allowlist: false
+    remove_ioc_from_blocklist: false
+    reset_identity_password: false
+    search_asset: false
+    search_email: false
+    search_events: false
+    send_email: false
+    send_message: false
+    submit_file: false
+    uncontain_host: false
+    update_alert: false
+    update_email: false
+    update_identity: false
+    update_ticket: false
+  parameters_description: >-
+    | Parameter | Type | Mandatory | Description |
+
+    | --- | --- | --- | --- |
+
+    | Database Name | String | Yes | Database name value. |
+
+    | Query | String | Yes | Query content, e.g: SELECT * FROM <Table> |
